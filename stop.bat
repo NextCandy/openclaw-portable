@@ -12,52 +12,49 @@ set "SCRIPT_DIR=%~dp0"
 if "%SCRIPT_DIR:~-1%"=="\" set "SCRIPT_DIR=%SCRIPT_DIR:~0,-1%"
 
 set "NODE_EXE=%SCRIPT_DIR%\node\node.exe"
-set "PKG_DIR=%SCRIPT_DIR%\openclaw-pkg"
-set "OPENCLAW_ENTRY=%PKG_DIR%\lib\node_modules\openclaw\bin\openclaw"
+set "OPENCLAW_ENTRY=%SCRIPT_DIR%\openclaw-pkg\node_modules\openclaw\bin\openclaw"
+set "OPENCLAW_HOME=%SCRIPT_DIR%\data"
 
 rem ============================================
-rem STEP 1: Stop OpenClaw Gateway
+rem STEP 1: Stop Gateway
 rem ============================================
 echo [1/2] Stopping OpenClaw Gateway...
 
-if not exist "%NODE_EXE%" (
-    echo [WARN] node.exe not found, trying taskkill fallback...
-    taskkill /F /IM node.exe /T >nul 2>&1
-    goto :cleanup
+if exist "%NODE_EXE%" (
+    if exist "%OPENCLAW_ENTRY%" (
+        "%NODE_EXE%" "%OPENCLAW_ENTRY%" gateway stop
+        if errorlevel 1 (
+            echo [WARN] gateway stop returned error, falling back to taskkill...
+            goto :taskkill_fallback
+        )
+        echo [OK]  Gateway stopped.
+        goto :cleanup
+    )
 )
 
-if not exist "%OPENCLAW_ENTRY%" (
-    echo [WARN] OpenClaw not found, trying taskkill fallback...
-    taskkill /F /IM node.exe /T >nul 2>&1
-    goto :cleanup
-)
-
-"%NODE_EXE%" "%OPENCLAW_ENTRY%" gateway stop
+:taskkill_fallback
+echo [INFO] Using taskkill to stop node processes...
+taskkill /F /IM node.exe /T >nul 2>&1
 if errorlevel 1 (
-    echo [WARN] gateway stop command failed, using taskkill...
-    taskkill /F /IM node.exe /T >nul 2>&1
+    echo [INFO] No node.exe processes found (already stopped).
+) else (
+    echo [OK]  node.exe processes terminated.
 )
-
-echo [OK]  OpenClaw stopped.
 
 :cleanup
 rem ============================================
-rem STEP 2: Clean up temp files
+rem STEP 2: Clean temp files
 rem ============================================
 echo.
-echo [2/2] Cleaning up...
+echo [2/2] Cleaning up temp files...
 
-set "TEMP_DIR=%USERPROFILE%\.openclaw-portable-temp"
-if exist "%TEMP_DIR%" (
-    rmdir /s /q "%TEMP_DIR%" >nul 2>&1
-    echo [OK]  Temp files cleaned.
-) else (
-    echo [OK]  No temp files to clean.
-)
+if exist "%SCRIPT_DIR%\node.zip"  del /f /q "%SCRIPT_DIR%\node.zip"  >nul 2>&1
+if exist "%SCRIPT_DIR%\node_tmp" rmdir /s /q "%SCRIPT_DIR%\node_tmp" >nul 2>&1
 
+echo [OK]  Done.
 echo.
 echo ==========================================
-echo   Done. Safe to remove USB drive.
+echo   Safe to remove USB drive.
 echo ==========================================
 echo.
 pause
