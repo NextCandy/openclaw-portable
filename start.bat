@@ -97,40 +97,45 @@ if not exist "%SCRIPT_DIR%\temp" mkdir "%SCRIPT_DIR%\temp"
 echo [OK]  Environment is ready
 
 rem ============================================
-rem [5/5] Start OpenClaw Gateway and Dashboard
+rem [5/5] Start OpenClaw Gateway
 rem ============================================
 echo.
 echo [5/5] Starting OpenClaw Gateway...
 echo.
-
-rem Start Gateway in background
-start /b "" "%NODE_EXE%" "%OPENCLAW_ENTRY%" gateway run --allow-unconfigured
-
-rem Wait for gateway to start
-echo   Waiting for Gateway to start...
-timeout /t 5 /nobreak >nul
-
-rem Get dashboard URL with token
-echo.
-echo   Getting dashboard URL with token...
-echo.
-
-for /f "tokens=*" %%u in ('"%NODE_EXE%" "%OPENCLAW_ENTRY%" dashboard --no-open 2^>^&1') do set DASHBOARD_URL=%%u
-
 echo   ==========================================
-echo   Access URL (with token):
-echo   !DASHBOARD_URL!
+echo   Access URL: http://localhost:%GATEWAY_PORT%
 echo   ==========================================
+echo.
+echo   The Gateway will generate a token on first start.
+echo   Look for this message in the output below:
+echo.
+echo     [gateway] auth token was missing. Generated a new token...
+echo.
+echo   Then visit http://localhost:%GATEWAY_PORT% in your browser
+echo   and enter the token when prompted.
 echo.
 echo   To stop: Run stop.bat or close this window
 echo.
 echo ==========================================
 echo.
 
-rem Auto-open browser
-start !DASHBOARD_URL!
+rem Auto-open browser after 8 seconds
+start "" cmd /c "timeout /t 8 /nobreak >nul && start http://localhost:%GATEWAY_PORT%"
 
-rem Keep window open (monitor gateway process)
-:loop
-timeout /t 60 /nobreak >nul
-goto loop
+rem Start OpenClaw Gateway (foreground)
+"%NODE_EXE%" "%OPENCLAW_ENTRY%" gateway run --allow-unconfigured
+
+rem === Exit handling ===
+echo.
+if errorlevel 1 (
+    echo [ERROR] OpenClaw exited with an error
+    echo.
+    echo Common causes:
+    echo   1. Port %GATEWAY_PORT% is in use
+    echo   2. Antivirus blocking - add to whitelist
+    echo.
+) else (
+    echo [INFO] OpenClaw stopped normally
+)
+echo.
+pause
