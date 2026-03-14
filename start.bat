@@ -97,7 +97,7 @@ echo.
 :: 保存上次使用的路径（可选）
 :: ============================================
 if not exist "%USB_ROOT%\openclaw-portable\data" mkdir "%USB_ROOT%\openclaw-portable\data"
-echo %USB_ROOT% > "%USB_ROOT%\openclaw-portable\data\.last_usb"
+echo "%USB_ROOT%" > "%USB_ROOT%\openclaw-portable\data\.last_usb"
 
 :: ============================================
 :: 执行启动
