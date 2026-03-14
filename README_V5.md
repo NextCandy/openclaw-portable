@@ -98,3 +98,74 @@ OpenClaw-Portable-v5.0/
 ---
 
 **推荐下载离线版！** 🎉
+
+## 🎨 可视化配置面板
+
+### 快速配置模型
+
+1. **打开配置面板**
+   - 双击 `open-config.bat`
+   - 或用浏览器打开 `config-ui/index.html`
+
+2. **选择模型厂商**
+   - OpenAI (GPT-4, GPT-3.5)
+   - Anthropic (Claude)
+   - Google (Gemini)
+   - 智谱 AI (GLM)
+   - DeepSeek
+   - Moonshot (Kimi)
+   - 自定义
+
+3. **填写配置**
+   - 模型名称 (如: gpt-4o, claude-3-5-sonnet)
+   - API 类型 (通常自动选择)
+   - API 地址 (通常自动填充)
+   - API Key
+
+4. **保存并重启**
+   - 点击"保存并重启 Gateway"
+   - 将下载的 `openclaw.json` 复制到 `data\.openclaw\`
+   - 或直接运行 `restart.bat`
+
+### 配置文件位置
+
+```
+data/
+└── .openclaw/
+    └── openclaw.json
+```
+
+### 手动配置示例
+
+```json
+{
+  "gateway": {
+    "mode": "local"
+  },
+  "agents": {
+    "defaults": {
+      "modelConfig": {
+        "api": "openai-chat",
+        "baseUrl": "https://api.openai.com/v1",
+        "model": "gpt-4o"
+      }
+    },
+    "providers": {
+      "openai": {
+        "api": "openai-chat",
+        "baseUrl": "https://api.openai.com/v1",
+        "models": [
+          {
+            "name": "gpt-4o",
+            "apiKey": "sk-your-api-key-here"
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+---
+
+*更新时间: 2026-03-15 02:26 UTC+8*
