@@ -42,25 +42,37 @@ openclaw-portable/
 
 ### Windows 用户
 
+**推荐：智能启动（自动检测 U盘）**
 1. **解压到 U盘**（约 1 分钟）
 2. **双击 `start.bat`**（首次约 30 秒）
+   - ✅ 自动检测 U盘盘符
+   - ✅ 多 U盘时可选择
+   - ✅ 记住上次路径
 3. **访问 http://localhost:3000**
 4. **使用完毕后，双击 `stop.bat`**
 
-就这么简单！
+**备用：基础启动（手动指定路径）**
+- 如智能版遇到问题，可使用 `start-basic.bat`
 
 ### Linux/macOS 用户
 
+**推荐：智能启动（自动检测 U盘）**
 ```bash
 # 解压
-tar -xzf openclaw-portable.tar.gz -C /media/usb/
+tar -xzf openclaw-portable.tar.gz
 
-# 启动
-cd /media/usb/openclaw-portable
+# 启动（自动检测 U盘）
+cd /media/$(whoami)/*/openclaw-portable
 ./start.sh
 
 # 关闭
 ./stop.sh
+```
+
+**备用：基础启动（手动指定路径）**
+```bash
+# 如智能版遇到问题
+./start-basic.sh /path/to/usb
 ```
 
 ---
