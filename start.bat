@@ -15,10 +15,24 @@ if "%SCRIPT_DIR:~-1%"=="\" set "SCRIPT_DIR=%SCRIPT_DIR:~0,-1%"
 rem === Path configuration ===
 set "NODE_EXE=%SCRIPT_DIR%\node\node.exe"
 set "NPM_CLI=%SCRIPT_DIR%\node\node_modules\npm\bin\npm-cli.js"
-set "OPENCLAW_ENTRY=%SCRIPT_DIR%\openclaw-pkg\node_modules\openclaw\bin\openclaw"
+
+rem Try both possible OpenClaw paths (Linux npm vs Windows npm)
+set "OPENCLAW_ENTRY_LINUX=%SCRIPT_DIR%\openclaw-pkg\lib\node_modules\openclaw\bin\openclaw"
+set "OPENCLAW_ENTRY_WINDOWS=%SCRIPT_DIR%\openclaw-pkg\node_modules\openclaw\bin\openclaw"
+
+if exist "%OPENCLAW_ENTRY_LINUX%" (
+    set "OPENCLAW_ENTRY=%OPENCLAW_ENTRY_LINUX%"
+    echo [INFO] Using Linux npm path
+) else if exist "%OPENCLAW_ENTRY_WINDOWS%" (
+    set "OPENCLAW_ENTRY=%OPENCLAW_ENTRY_WINDOWS%"
+    echo [INFO] Using Windows npm path
+) else (
+    set "OPENCLAW_ENTRY=%OPENCLAW_ENTRY_LINUX%"
+)
+
 set "OPENCLAW_HOME=%SCRIPT_DIR%\data"
 set "GATEWAY_PORT=18789"
-set "PATH=%SCRIPT_DIR%\node;%SCRIPT_DIR%\openclaw-pkg\node_modules\.bin;%PATH%"
+set "PATH=%SCRIPT_DIR%\node;%SCRIPT_DIR%\openclaw-pkg\node_modules\.bin;%SCRIPT_DIR%\openclaw-pkg\lib\node_modules\.bin;%PATH%"
 
 echo [INFO] Script dir : %SCRIPT_DIR%
 echo [INFO] Node dir   : %SCRIPT_DIR%\node
@@ -59,11 +73,15 @@ if not exist "%OPENCLAW_ENTRY%" (
     echo.
     echo [ERROR] openclaw not found!
     echo.
+    echo Checked paths:
+    echo   - %OPENCLAW_ENTRY_LINUX%
+    echo   - %OPENCLAW_ENTRY_WINDOWS%
+    echo.
     echo This is an offline package. OpenClaw should be pre-installed
     echo in the openclaw-pkg\ directory.
     echo.
     echo Please make sure you downloaded the complete offline package:
-    echo   OpenClaw-Portable-v5.0.0-windows-offline.zip
+    echo   OpenClaw-Portable-v5.0.0-windows-offline-fixed.zip
     echo.
     pause
     exit /b 1
