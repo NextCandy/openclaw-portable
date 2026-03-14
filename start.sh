@@ -77,7 +77,7 @@ fi
 # ============================================
 # 2. 选择 U盘（如果找到多个）
 # ============================================
-if [ $USB_COUNT -eq 0 ]; then
+if [ "$USB_COUNT" -eq 0 ]; then
     echo -e "${RED}❌ 未检测到 U盘！${NC}"
     echo ""
     echo "请确保："
@@ -85,10 +85,10 @@ if [ $USB_COUNT -eq 0 ]; then
     echo "2. U盘包含 openclaw-portable 目录"
     echo "3. 有读取权限"
     exit 1
-elif [ $USB_COUNT -eq 1 ]; then
+elif [ "$USB_COUNT" -eq 1 ]; then
     USB_PATH="${USB_LIST[0]}"
     echo ""
-    echo -e "${GREEN}✅ 自动选择: $(dirname $USB_PATH)${NC}"
+    echo -e "${GREEN}✅ 自动选择: $(dirname "$USB_PATH")${NC}"
 else
     echo ""
     echo -e "${YELLOW}[提示] 检测到多个 U盘，请选择：${NC}"
@@ -96,7 +96,7 @@ else
     read -p "请输入序号 (1-$USB_COUNT): " CHOICE
     
     # 验证输入
-    if ! [[ "$CHOICE" =~ ^[0-9]+$ ]] || [ "$CHOICE" -lt 1 ] || [ "$CHOICE" -gt $USB_COUNT ]; then
+    if ! [[ "$CHOICE" =~ ^[0-9]+$ ]] || [ "$CHOICE" -lt 1 ] || [ "$CHOICE" -gt "$USB_COUNT" ]; then
         echo -e "${RED}❌ 无效选择${NC}"
         exit 1
     fi
