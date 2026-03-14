@@ -81,7 +81,7 @@ if not exist "%OPENCLAW_ENTRY%" (
     echo in the openclaw-pkg\ directory.
     echo.
     echo Please make sure you downloaded the complete offline package:
-    echo   OpenClaw-Portable-v5.0.0-windows-offline-fixed3.zip
+    echo   OpenClaw-Portable-v5.0.0-windows-offline-fixed4.zip
     echo.
     pause
     exit /b 1
@@ -122,18 +122,6 @@ if not exist "%SCRIPT_DIR%\data" mkdir "%SCRIPT_DIR%\data"
 if not exist "%SCRIPT_DIR%\workspace" mkdir "%SCRIPT_DIR%\workspace"
 if not exist "%SCRIPT_DIR%\temp" mkdir "%SCRIPT_DIR%\temp"
 
-rem Create default config if not exists
-if not exist "%OPENCLAW_HOME%\openclaw.json" (
-    echo [INFO] Creating default config...
-    (
-        echo {^
-        echo   "gateway": {^
-        echo     "mode": "local"^
-        echo   }^
-        echo }
-    ) > "%OPENCLAW_HOME%\openclaw.json"
-)
-
 echo [OK]  Environment is ready
 
 rem ============================================
@@ -148,7 +136,8 @@ echo.
 echo ==========================================
 echo.
 
-"%NODE_EXE%" "%OPENCLAW_ENTRY%" gateway run
+rem Start with --allow-unconfigured to skip setup
+"%NODE_EXE%" "%OPENCLAW_ENTRY%" gateway run --allow-unconfigured
 
 rem === Exit handling ===
 echo.
@@ -157,8 +146,8 @@ if errorlevel 1 (
     echo.
     echo Common causes:
     echo   1. Port %GATEWAY_PORT% is in use
-    echo   2. Config file corrupted - delete data\openclaw.json and retry
-    echo   3. Antivirus blocking - add to whitelist
+    echo   2. Antivirus blocking - add to whitelist
+    echo   3. Missing dependencies - try start-online.bat
     echo.
 ) else (
     echo [INFO] OpenClaw stopped normally
