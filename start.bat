@@ -102,56 +102,38 @@ rem ============================================
 echo.
 echo [5/5] Starting OpenClaw Gateway...
 echo.
-echo   Gateway is starting...
-echo   Waiting for token generation...
-echo.
-
-rem Start OpenClaw Gateway in background and capture output
-start /b "" "%NODE_EXE%" "%OPENCLAW_ENTRY%" gateway run --allow-unconfigured
-
-rem Wait for gateway to start and generate token (max 10 seconds)
-set TOKEN_FILE=%OPENCLAW_HOME%\.token
-set TOKEN_WAIT=0
-
-:wait_for_token
-if exist "%TOKEN_FILE%" goto :got_token
-timeout /t 1 /nobreak >nul
-set /a TOKEN_WAIT+=1
-if !TOKEN_WAIT! geq 10 goto :timeout
-goto :wait_for_token
-
-:got_token
-rem Read token from file
-set /p ACCESS_TOKEN=<"%TOKEN_FILE%"
-
 echo   ==========================================
-echo   Access URL (with token):
-echo   http://localhost:%GATEWAY_PORT%/?token=!ACCESS_TOKEN!
+echo   Access URL: http://localhost:%GATEWAY_PORT%
 echo   ==========================================
 echo.
-echo   Token: !ACCESS_TOKEN!
-echo   Saved to: %TOKEN_FILE%
+echo   Instructions:
+echo   1. Wait for Gateway to start (5-10 seconds)
+echo   2. Browser will open automatically
+echo   3. If prompted for token, check the console output
+echo      or look in: %OPENCLAW_HOME%\.token
 echo.
 echo   To stop: Run stop.bat or close this window
 echo.
 echo ==========================================
 echo.
 
-rem Auto-open browser
-start http://localhost:%GATEWAY_PORT%/?token=!ACCESS_TOKEN!
+rem Auto-open browser after 5 seconds
+start "" cmd /c "timeout /t 5 /nobreak >nul && start http://localhost:%GATEWAY_PORT%"
 
-rem Keep window open
-echo Gateway is running. Close this window to stop.
-echo.
-pause
-goto :eof
+rem Start OpenClaw Gateway (foreground)
+"%NODE_EXE%" "%OPENCLAW_ENTRY%" gateway run --allow-unconfigured
 
-:timeout
+rem === Exit handling ===
 echo.
-echo [WARN] Timeout waiting for token
-echo        Gateway may still be starting...
-echo.
-echo   Access URL: http://localhost:%GATEWAY_PORT%
-echo   Token file: %TOKEN_FILE%
+if errorlevel 1 (
+    echo [ERROR] OpenClaw exited with an error
+    echo.
+    echo Common causes:
+    echo   1. Port %GATEWAY_PORT% is in use
+    echo   2. Antivirus blocking - add to whitelist
+    echo.
+) else (
+    echo [INFO] OpenClaw stopped normally
+)
 echo.
 pause
