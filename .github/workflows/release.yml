@@ -10,6 +10,9 @@ on:
         required: true
         default: 'v5.0.0'
 
+permissions:
+  contents: write
+
 env:
   NODE_VERSION: "22.16.0"
   OPENCLAW_VERSION: "latest"
@@ -22,11 +25,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y zip unzip curl
       
       - name: Download Node.js for Windows
         run: |
@@ -89,14 +87,14 @@ jobs:
           sha256sum OpenClaw-Portable-*-offline.zip > checksums.sha256
           echo "✓ Checksum generated"
       
-      - name: Create GitHub Release
+      - name: Upload Release Asset
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
             dist/OpenClaw-Portable-*-offline.zip
             dist/checksums.sha256
-          generate_release_notes: true
+          generate_release_notes: false
           body: |
             ## 🚀 OpenClaw Portable v5.0 - 完全离线版本
             
