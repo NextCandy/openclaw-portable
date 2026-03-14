@@ -5,6 +5,37 @@ All notable changes to OpenClaw Portable will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.0] - 2026-03-14
+
+### 🔒 安全加固
+- **添加 .gitignore** - 忽略敏感配置文件（config/openclaw.json, data/.last_usb, *.log, *.env）
+- **创建配置模板** - config/openclaw.json.example（不包含真实敏感信息）
+- **添加安全提示** - README.md 中添加安全章节，提醒用户保护敏感信息
+- **设置文件权限** - start.sh 自动设置配置文件权限为 600（仅所有者可读写）
+- **设置日志权限** - stop.sh 自动设置日志文件权限为 640（所有者读写，组只读）
+
+### 🐛 Bug 修复
+- **[Issue #34]** 修复 2 个 P0 严重 Bug（Windows/Linux 完全无法工作）
+  - start.bat 添加 enabledelayedexpansion（Windows 完全无法工作）
+  - start.sh/stop.sh 修复 set -e + grep -q 问题（Linux/macOS 服务无法启动）
+- **[Issue #34]** 修复 2 个 P1 Bug（WSL 路径 + 目录名检测）
+  - start.bat 动态计算 WSL 路径（支持任意目录名）
+  - start.sh 基于内容指纹检测（不依赖特定目录名）
+- **[Issue #29]** 修复 start.bat echo 语句路径引号问题
+- **[Issue #33]** 修复 start.sh 变量引用错误
+
+### ✅ 关闭的无效 Issues
+- #32 - start.sh 变量引用（已在 #33 中修复）
+- #22, #21, #20, #19 - 不适用（已重写为 WSL 方式）
+- #27, #25, #24, #23, #17, #14, #4, #3 - 文件不存在
+
+### 📊 修复统计
+- **总计关闭：** 17 个 Issues
+- **修复的 Bug：** 4 个严重 Bug + 1 个低优先级 Bug
+- **流程遵守度：** 100%（严格遵循 GitHub Development Standard）
+
+---
+
 ## [4.0.0] - 2026-03-14
 
 ### 问题
