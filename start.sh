@@ -182,6 +182,11 @@ EOF
     echo -e "${GREEN}✅ 默认配置已创建${NC}"
 fi
 
+# 设置配置文件权限（仅所有者可读写，保护敏感信息）
+if [ -f "$TEMP_DIR/openclaw.json" ]; then
+    chmod 600 "$TEMP_DIR/openclaw.json"
+fi
+
 # ============================================
 # 6. 启动 OpenClaw
 # ============================================

@@ -1,10 +1,8 @@
 {
-  "version": "2026.3.12",
   "port": 3000,
-  "sandbox": {
-    "mode": "off"
-  },
   "models": {
-    "default": "zai/glm-5"
-  }
+    "default": "zai/glm-5",
+    "_comment": "在此填入你的 API Key，例如：\"api_key\": \"sk-xxx\""
+  },
+  "_security_warning": "请勿将此文件分享或上传到公开仓库！"
 }

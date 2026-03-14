@@ -71,6 +71,9 @@ if [ -d "$WORKSPACE_DIR" ]; then
     fi
 fi
 
+# 设置日志文件权限（仅所有者可读写，组可读，保护敏感信息）
+find "$DATA_DIR" -name "*.log" -exec chmod 640 {} \; 2>/dev/null || true
+
 echo ""
 
 # ============================================
