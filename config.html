@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>OpenClaw 配置</title>
+    <style>
+        body{font-family:system-ui;max-width:600px;margin:40px auto;padding:20px;background:#f5f5f5}
+        .card{background:white;border-radius:12px;padding:30px;box-shadow:0 2px 10px rgba(0,0,0,.1)}
+        h1{margin:0 0 20px;font-size:24px}
+        .group{margin-bottom:20px}
+        label{display:block;font-weight:600;margin-bottom:8px;color:#333}
+        input,select{width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px}
+        input:focus,select:focus{outline:none;border-color:#667eea}
+        .btn{width:100%;padding:12px;border:none;border-radius:8px;font-size:16px;cursor:pointer;margin-top:10px}
+        .btn-primary{background:#667eea;color:white}
+        .btn-primary:hover{background:#5a67d8}
+        .msg{padding:12px;border-radius:8px;margin-top:15px;display:none}
+        .msg.ok{background:#d1fae5;color:#065f46;display:block}
+        .msg.err{background:#fee2e2;color:#991b1b;display:block}
+        code{background:#f0f0f0;padding:2px 6px;border-radius:4px;font-size:12px}
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>🦞 OpenClaw 配置</h1>
+    
+    <div class="group">
+        <label>模型厂商</label>
+        <select id="provider" onchange="fillPreset()">
+            <option value="openai">OpenAI (GPT-4o)</option>
+            <option value="anthropic">Anthropic (Claude)</option>
+            <option value="google">Google (Gemini)</option>
+            <option value="zhipu">智谱 AI (GLM)</option>
+            <option value="deepseek">DeepSeek</option>
+            <option value="custom">自定义</option>
+        </select>
+    </div>
+    
+    <div class="group">
+        <label>模型名称</label>
+        <input type="text" id="model" placeholder="gpt-4o">
+    </div>
+    
+    <div class="group">
+        <label>API 地址</label>
+        <input type="text" id="apiUrl" placeholder="https://api.openai.com/v1">
+    </div>
+    
+    <div class="group">
+        <label>API Key</label>
+        <input type="password" id="apiKey" placeholder="sk-...">
+    </div>
+    
+    <button class="btn btn-primary" onclick="saveConfig()">💾 生成配置文件</button>
+    
+    <div id="msg" class="msg"></div>
+</div>
+
+<script>
+const presets = {
+    openai: {apiUrl:'https://api.openai.com/v1',model:'gpt-4o'},
+    anthropic: {apiUrl:'https://api.anthropic.com',model:'claude-3-5-sonnet-20241022'},
+    google: {apiUrl:'https://generativelanguage.googleapis.com/v1beta',model:'gemini-1.5-pro'},
+    zhipu: {apiUrl:'https://open.bigmodel.cn/api/paas/v4',model:'glm-4'},
+    deepseek: {apiUrl:'https://api.deepseek.com/v1',model:'deepseek-chat'},
+    custom: {apiUrl:'',model:''}
+};
+
+function fillPreset() {
+    const p = presets[document.getElementById('provider').value];
+    document.getElementById('apiUrl').value = p.apiUrl;
+    document.getElementById('model').value = p.model;
+}
+
+function saveConfig() {
+    const provider = document.getElementById('provider').value;
+    const model = document.getElementById('model').value;
+    const apiUrl = document.getElementById('apiUrl').value;
+    const apiKey = document.getElementById('apiKey').value;
+    
+    if (!model || !apiUrl || !apiKey) {
+        showMsg('请填写所有字段', false);
+        return;
+    }
+    
+    const config = {
+        gateway: {mode: "local"},
+        agents: {
+            defaults: {
+                modelConfig: {api: "openai-chat", baseUrl: apiUrl, model: model}
+            },
+            providers: {
+                [provider]: {
+                    api: "openai-chat",
+                    baseUrl: apiUrl,
+                    models: [{name: model, apiKey: apiKey}]
+                }
+            }
+        }
+    };
+    
+    // 下载文件
+    const blob = new Blob([JSON.stringify(config, null, 2)], {type: 'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'openclaw.json';
+    a.click();
+    
+    showMsg(`✅ 配置文件已下载！
+
+下一步：
+1. 将下载的 openclaw.json 复制到 data\\.openclaw\\ 目录
+2. 运行 restart.bat 重启 Gateway
+
+配置位置：<code>data\\.openclaw\\openclaw.json</code>`, true);
+}
+
+function showMsg(text, ok) {
+    const msg = document.getElementById('msg');
+    msg.innerHTML = text;
+    msg.className = 'msg ' + (ok ? 'ok' : 'err');
+}
+
+// 初始化
+fillPreset();
+</script>
+</body>
+</html>
