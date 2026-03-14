@@ -1,0 +1,41 @@
+# 数据目录
+data/
+workspace/
+
+# 临时文件
+*.tmp
+*.temp
+*.log
+
+# 备份文件
+*.backup
+*.bak
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 压缩包
+*.tar.gz
+*.zip
+
+# Node modules（如果重新安装）
+node_modules/
+
+# 环境变量
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+
+# 其他
+*.swp
+*.swo
+*~
+
+# 大文件（超过 GitHub 限制）
+# 这些文件将在 GitHub Release 中提供
+node/
+npm-global/
