@@ -3,314 +3,188 @@ setlocal enabledelayedexpansion
 title OpenClaw Portable
 
 echo.
-echo ========================================
-echo    OpenClaw Portable v4.1.8
-echo    Auto-detect and repair dependencies
-echo ========================================
+echo ==========================================
+echo   OpenClaw Portable - Windows Launcher
+echo ==========================================
 echo.
 
-rem Get current script directory
+rem ============================================
+rem STEP 0: Resolve script directory
+rem ============================================
 set "SCRIPT_DIR=%~dp0"
-set "SCRIPT_DIR=%SCRIPT_DIR:~0,-1%"
-echo [INFO] Script directory: %SCRIPT_DIR%
+if "%SCRIPT_DIR:~-1%"=="\" set "SCRIPT_DIR=%SCRIPT_DIR:~0,-1%"
+
+set "NODE_DIR=%SCRIPT_DIR%\node"
+set "NODE_EXE=%NODE_DIR%\node.exe"
+set "NPM_CLI=%NODE_DIR%\node_modules\npm\bin\npm-cli.js"
+set "PKG_DIR=%SCRIPT_DIR%\openclaw-pkg"
+set "OPENCLAW_ENTRY=%PKG_DIR%\lib\node_modules\openclaw\bin\openclaw"
+
+echo [INFO] Base directory: %SCRIPT_DIR%
 echo.
 
 rem ============================================
-rem STEP 1: Check Node.js
+rem STEP 1: Check bundled Node.js
+rem         If missing, auto-download it
 rem ============================================
-set "NODE_EXE=%SCRIPT_DIR%\node\node.exe"
-set "NPM_GLOBAL=%SCRIPT_DIR%\npm-global"
+echo [1/4] Checking Node.js...
 
 if exist "%NODE_EXE%" (
-    "%NODE_EXE%" --version >nul 2>&1
-    if not errorlevel 1 (
-        for /f "tokens=*" %%v in ('"%NODE_EXE%" --version') do set NODE_VER=%%v
-        echo [OK] Found bundled Node.js !NODE_VER!
-        goto :check_openclaw
-    )
+    for /f "tokens=*" %%v in ('"%NODE_EXE%" --version 2^>^&1') do set NODE_VER=%%v
+    echo [OK]  Bundled Node.js !NODE_VER!
+    goto :check_openclaw
 )
 
-echo [WARN] Bundled node\node.exe not found.
-echo        Trying system Node.js...
-node --version >nul 2>&1
+echo [WARN] node\node.exe not found. Will download Node.js now.
+echo       This only happens ONCE. All future runs are fully offline.
+echo.
+
+rem Use PowerShell to download - available on all Windows 10/11
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+    "$ErrorActionPreference='Stop'; ^
+    $nodeVer='22.14.0'; ^
+    $dir='%SCRIPT_DIR%'; ^
+    $mirrors=@('https://npmmirror.com/mirrors/node/v'+$nodeVer+'/node-v'+$nodeVer+'-win-x64.zip','https://nodejs.org/dist/v'+$nodeVer+'/node-v'+$nodeVer+'-win-x64.zip'); ^
+    $zip=$dir+'\\node.zip'; ^
+    $tmp=$dir+'\\node_tmp'; ^
+    $ok=$false; ^
+    foreach($url in $mirrors){ ^
+        try{ ^
+            Write-Host ('[INFO] Downloading from: '+$url); ^
+            (New-Object Net.WebClient).DownloadFile($url,$zip); ^
+            $ok=$true; break ^
+        }catch{ Write-Host ('[WARN] Mirror failed, trying next...') } ^
+    }; ^
+    if(-not $ok){Write-Error 'All mirrors failed'; exit 1}; ^
+    Write-Host '[INFO] Extracting...'; ^
+    if(Test-Path $tmp){Remove-Item $tmp -Recurse -Force}; ^
+    Expand-Archive -Path $zip -DestinationPath $tmp -Force; ^
+    $sub=Get-ChildItem $tmp -Directory | Select-Object -First 1; ^
+    if(Test-Path ($dir+'\\node')){Remove-Item ($dir+'\\node') -Recurse -Force}; ^
+    Move-Item $sub.FullName ($dir+'\\node'); ^
+    Remove-Item $zip,$tmp -Recurse -Force -ErrorAction SilentlyContinue; ^
+    Write-Host '[OK]  Node.js ready.'"
+
 if errorlevel 1 (
-    echo [ERROR] No Node.js found. Please re-extract the portable package.
+    echo.
+    echo [ERROR] Failed to download Node.js.
+    echo         Please check your internet connection and try again.
+    echo         Or manually place Node.js 22.x Windows x64 portable into: node\
+    echo         Download from: https://nodejs.org/dist/v22.14.0/node-v22.14.0-win-x64.zip
     pause
     exit /b 1
 )
-set "NODE_EXE=node"
-echo [OK] Using system Node.js.
 
-rem ============================================
-rem STEP 2: Check OpenClaw (with auto-install)
-rem ============================================
+if not exist "%NODE_EXE%" (
+    echo [ERROR] Download completed but node.exe not found. Unexpected error.
+    pause
+    exit /b 1
+)
+
+for /f "tokens=*" %%v in ('"%NODE_EXE%" --version 2^>^&1') do set NODE_VER=%%v
+echo [OK]  Node.js %NODE_VER% downloaded and ready.
+
 :check_openclaw
-
-rem Find openclaw command
-if exist "%NPM_GLOBAL%\openclaw.cmd" (
-    set "OPENCLAW_CMD=%NPM_GLOBAL%\openclaw.cmd"
-) else if exist "%NPM_GLOBAL%\bin\openclaw.cmd" (
-    set "OPENCLAW_CMD=%NPM_GLOBAL%\bin\openclaw.cmd"
-)
-
-if not "%OPENCLAW_CMD%"=="" (
-    echo [OK] Found OpenClaw at: %OPENCLAW_CMD%
-    goto :verify_installation
-)
-
 rem ============================================
-rem STEP 2.5: Auto-install OpenClaw (with retry)
+rem STEP 2: Check OpenClaw installation
+rem         If missing, install via bundled npm
 rem ============================================
 echo.
-echo [WARN] OpenClaw not found. Starting auto-install...
+echo [2/4] Checking OpenClaw...
+
+if exist "%OPENCLAW_ENTRY%" (
+    echo [OK]  OpenClaw found.
+    goto :setup_env
+)
+
+echo [INFO] OpenClaw not found. Installing now (requires internet, one-time only)...
 echo.
 
-set MAX_RETRIES=3
-set RETRY_COUNT=0
+if not exist "%NPM_CLI%" (
+    echo [ERROR] npm not found at: %NPM_CLI%
+    echo         The Node.js package may be incomplete. Delete node\ and re-run to re-download.
+    pause
+    exit /b 1
+)
 
-:install_loop
-set /a RETRY_COUNT+=1
-echo [INSTALL] Attempting to install OpenClaw (!RETRY_COUNT!/%MAX_RETRIES%)...
-echo.
+if not exist "%PKG_DIR%" mkdir "%PKG_DIR%"
 
-rem Create npm-global directory
-if not exist "%NPM_GLOBAL%" mkdir "%NPM_GLOBAL%"
+rem Try China mirror first, fall back to global npm registry
+set INSTALL_OK=0
+for %%R in (https://registry.npmmirror.com https://registry.npmjs.org) do (
+    if !INSTALL_OK!==0 (
+        echo [INFO] Trying registry: %%R
+        "%NODE_EXE%" "%NPM_CLI%" install -g openclaw --prefix "%PKG_DIR%" --registry %%R
+        if not errorlevel 1 set INSTALL_OK=1
+    )
+)
 
-rem Install OpenClaw
-"%NODE_EXE%" "%SCRIPT_DIR%\node\node_modules\npm\bin\npm-cli.js" install openclaw@latest ^
-    --no-git-tag-version ^
-    --no-audit ^
-    --no-fund ^
-    --loglevel error ^
-    --prefix "%SCRIPT_DIR%" ^
-    --global-style
-
-if errorlevel 1 (
+if %INSTALL_OK%==0 (
     echo.
-    echo [WARN] npm install failed (attempt !RETRY_COUNT!)
-    
-    if !RETRY_COUNT! LSS %MAX_RETRIES% (
-        echo.
-        echo [DIAGNOSE] Checking failure reason...
-        
-        rem Check network
-        ping -n 1 registry.npmjs.org >nul 2>&1
-        if errorlevel 1 (
-            echo [!] Network issue detected
-        ) else (
-            echo [OK] Network OK
-        )
-        
-        rem Clean npm cache
-        echo [CLEAN] Clearing npm cache...
-        "%NODE_EXE%" "%SCRIPT_DIR%\node\node_modules\npm\bin\npm-cli.js" cache clean --force >nul 2>&1
-        
-        echo.
-        echo [RETRY] Retrying in 5 seconds...
-        timeout /t 5 /nobreak >nul
-        goto install_loop
-    ) else (
-        echo.
-        echo [ERROR] Installation failed after %MAX_RETRIES% attempts
-        echo.
-        echo Possible fixes:
-        echo   1. Check your internet connection
-        echo   2. Run as Administrator
-        echo   3. Disable antivirus temporarily
-        echo   4. Try manual install: npm install openclaw -g
-        pause
-        exit /b 1
-    )
+    echo [ERROR] Failed to install OpenClaw from all registries.
+    echo         Check your internet connection and try again.
+    pause
+    exit /b 1
 )
 
-rem Re-check for openclaw command after install
-if exist "%NPM_GLOBAL%\openclaw.cmd" (
-    set "OPENCLAW_CMD=%NPM_GLOBAL%\openclaw.cmd"
-) else if exist "%NPM_GLOBAL%\bin\openclaw.cmd" (
-    set "OPENCLAW_CMD=%NPM_GLOBAL%\bin\openclaw.cmd"
-) else (
-    echo [WARN] openclaw.cmd still not found after install, trying WSL2...
-    goto :try_wsl
+if not exist "%OPENCLAW_ENTRY%" (
+    echo [ERROR] Install reported success but openclaw entry not found.
+    echo         Expected: %OPENCLAW_ENTRY%
+    echo         Please open an issue at: https://github.com/SonicBotMan/openclaw-portable
+    pause
+    exit /b 1
 )
 
-echo [OK] OpenClaw installed successfully!
+echo [OK]  OpenClaw installed successfully.
 
+:setup_env
 rem ============================================
-rem STEP 3: Verify installation
+rem STEP 3: Set up environment
 rem ============================================
-:verify_installation
-
 echo.
-echo [VERIFY] Checking installation integrity...
-set VERIFY_FAILED=0
+echo [3/4] Setting up environment...
 
-rem Check 1: npm-global exists
-if not exist "%NPM_GLOBAL%" (
-    echo [X] npm-global directory not found
-    set VERIFY_FAILED=1
-) else (
-    echo [OK] npm-global exists
-)
-
-rem Check 2: openclaw package
-if exist "%SCRIPT_DIR%\node_modules\openclaw" (
-    echo [OK] openclaw package exists
-) else (
-    echo [X] openclaw package not found
-    set VERIFY_FAILED=1
-)
-
-rem Check 3: entry file
-set ENTRY_FOUND=0
-for %%p in (
-    "%SCRIPT_DIR%\node_modules\openclaw\dist\entry.js"
-    "%SCRIPT_DIR%\node_modules\openclaw\lib\entry.js"
-    "%SCRIPT_DIR%\node_modules\openclaw\src\entry.js"
-    "%SCRIPT_DIR%\node_modules\openclaw\entry.js"
-    "%SCRIPT_DIR%\node_modules\openclaw\index.js"
-) do (
-    if exist %%p (
-        echo [OK] Entry file found
-        set ENTRY_FOUND=1
-    )
-)
-
-if !ENTRY_FOUND! EQU 0 (
-    echo [X] Entry file not found
-    set VERIFY_FAILED=1
-)
-
-if !VERIFY_FAILED! EQU 1 (
-    echo.
-    echo [WARN] Verification failed, reinstalling...
-    rmdir /s /q "%SCRIPT_DIR%\node_modules" 2>nul
-    rmdir /s /q "%NPM_GLOBAL%" 2>nul
-    
-    if !RETRY_COUNT! LSS %MAX_RETRIES% (
-        goto install_loop
-    ) else (
-        echo [ERROR] Max retries reached. Please re-download the package.
-        pause
-        exit /b 1
-    )
-)
-
-echo [OK] All checks passed!
-echo.
-
-rem ============================================
-rem STEP 4: Start OpenClaw (native Windows)
-rem ============================================
-:start_native
-
-echo.
-echo [START] Launching OpenClaw via native Windows Node.js...
-echo.
-
-set "PATH=%SCRIPT_DIR%\node;%SCRIPT_DIR%\node\bin;%NPM_GLOBAL%;%NPM_GLOBAL%\bin;%PATH%"
+set "PATH=%NODE_DIR%;%NODE_DIR%\bin;%PKG_DIR%\bin;%PATH%"
 set "OPENCLAW_WORKSPACE=%SCRIPT_DIR%\workspace"
 set "OPENCLAW_CONFIG_DIR=%SCRIPT_DIR%\config"
-set "NODE_PATH=%NPM_GLOBAL%\lib\node_modules"
+set "NODE_PATH=%PKG_DIR%\lib\node_modules"
 
 if not exist "%SCRIPT_DIR%\workspace" mkdir "%SCRIPT_DIR%\workspace"
-if not exist "%SCRIPT_DIR%\config" mkdir "%SCRIPT_DIR%\config"
-if not exist "%SCRIPT_DIR%\data" mkdir "%SCRIPT_DIR%\data"
+if not exist "%SCRIPT_DIR%\config"    mkdir "%SCRIPT_DIR%\config"
+if not exist "%SCRIPT_DIR%\data"      mkdir "%SCRIPT_DIR%\data"
 
-echo [RUN] Starting OpenClaw Gateway...
-echo.
-call "%OPENCLAW_CMD%" gateway start
-if errorlevel 1 (
-    echo.
-    echo [ERROR] Failed to start OpenClaw!
-    echo         Check if port 3000 is already in use.
-    pause
-    exit /b 1
-)
-goto :success
+echo [OK]  Directories ready.
 
 rem ============================================
-rem WSL2 fallback path
+rem STEP 4: Start OpenClaw
 rem ============================================
-:try_wsl
-
 echo.
-echo [INFO] Checking WSL2 availability...
-
-wsl --status >nul 2>&1
-if not errorlevel 1 (
-    echo [OK] WSL2 is available.
-    goto :start_wsl
-)
-
-echo [WARN] WSL2 is not installed.
+echo [4/4] Starting OpenClaw Gateway...
 echo.
-echo WSL2 is required as a fallback. Options:
-echo   [1] Auto-install WSL2 (requires admin rights + reboot)
-echo   [2] Exit and re-extract the portable package
-echo.
-set /p WSL_CHOICE="Enter choice (1 or 2): "
 
-if "%WSL_CHOICE%"=="1" goto :install_wsl
-echo Exiting. Please re-extract and ensure node\ directory is present.
-pause
-exit /b 1
+"%NODE_EXE%" "%OPENCLAW_ENTRY%" gateway start
 
-:install_wsl
-net session >nul 2>&1
-if errorlevel 1 (
-    echo [ERROR] Admin rights required to install WSL2.
-    echo         Right-click start.bat and choose "Run as administrator".
-    pause
-    exit /b 1
-)
-
-echo [INFO] Enabling WSL2 features...
-dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart >nul 2>&1
-dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart >nul 2>&1
-
-echo [INFO] Installing WSL2 with Ubuntu...
-wsl --install -d Ubuntu
 if errorlevel 1 (
     echo.
-    echo [ERROR] WSL2 install failed.
-    echo         Please run manually as admin: wsl --install -d Ubuntu
-    echo         Then reboot and re-run start.bat
-    pause
-    exit /b 1
-)
-
-echo.
-echo [DONE] WSL2 installed. A REBOOT IS REQUIRED.
-echo        After reboot, run start.bat again.
-echo.
-pause
-exit /b 0
-
-:start_wsl
-set "DRIVE_LETTER=%SCRIPT_DIR:~0,1%"
-set "SCRIPT_PATH=%SCRIPT_DIR:~2%"
-set "SCRIPT_PATH=%SCRIPT_PATH:\=/%"
-set "WSL_PATH=/mnt/%DRIVE_LETTER%%SCRIPT_PATH%"
-
-echo [INFO] WSL path: %WSL_PATH%
-echo [START] Starting OpenClaw via WSL2...
-echo.
-
-wsl -e bash -c "cd '%WSL_PATH%' && chmod +x *.sh && ./start.sh '%WSL_PATH%'"
-if errorlevel 1 (
+    echo [ERROR] OpenClaw failed to start!
     echo.
-    echo [ERROR] WSL2 launch failed. Check the error above.
+    echo  Possible causes:
+    echo    1. Port 3000 is already in use
+    echo       Run: netstat -aon | findstr :3000
+    echo    2. OpenClaw installation is corrupted
+    echo       Delete openclaw-pkg\ folder and re-run start.bat
+    echo    3. Config file error
+    echo       Check: %SCRIPT_DIR%\config\
+    echo.
     pause
     exit /b 1
 )
 
-:success
 echo.
-echo ========================================
-echo   SUCCESS - OpenClaw is running!
-echo   Visit: http://localhost:3000
-echo ========================================
-echo.
-echo Run stop.bat to shut down cleanly.
+echo ==========================================
+echo   SUCCESS  OpenClaw is running!
+echo   Visit:   http://localhost:3000
+echo   Stop:    Run stop.bat to shut down
+echo ==========================================
 echo.
 pause

@@ -1,33 +1,63 @@
 @echo off
-chcp 65001 >nul
-title OpenClaw Portable - 一键关闭
+setlocal enabledelayedexpansion
+title OpenClaw Portable - Stop
 
 echo.
-echo ========================================
-echo    OpenClaw Portable - 一键关闭
-echo ========================================
+echo ==========================================
+echo   OpenClaw Portable - Shutdown
+echo ==========================================
 echo.
 
-:: 获取当前目录（U盘路径）
-set "USB_ROOT=%~dp0"
-set "USB_ROOT=%USB_ROOT:~0,-1%"
-set "DRIVE_LETTER=%USB_ROOT:~0,1%"
-set "WSL_USB=/mnt/%DRIVE_LETTER%/openclaw-portable"
+set "SCRIPT_DIR=%~dp0"
+if "%SCRIPT_DIR:~-1%"=="\" set "SCRIPT_DIR=%SCRIPT_DIR:~0,-1%"
 
-echo [信息] 正在保存数据并清理...
-echo.
+set "NODE_EXE=%SCRIPT_DIR%\node\node.exe"
+set "PKG_DIR=%SCRIPT_DIR%\openclaw-pkg"
+set "OPENCLAW_ENTRY=%PKG_DIR%\lib\node_modules\openclaw\bin\openclaw"
 
-:: 执行 WSL 停止脚本
-wsl -e bash -c "cd '%WSL_USB%' && ./stop.sh '%WSL_USB%'"
+rem ============================================
+rem STEP 1: Stop OpenClaw Gateway
+rem ============================================
+echo [1/2] Stopping OpenClaw Gateway...
+
+if not exist "%NODE_EXE%" (
+    echo [WARN] node.exe not found, trying taskkill fallback...
+    taskkill /F /IM node.exe /T >nul 2>&1
+    goto :cleanup
+)
+
+if not exist "%OPENCLAW_ENTRY%" (
+    echo [WARN] OpenClaw not found, trying taskkill fallback...
+    taskkill /F /IM node.exe /T >nul 2>&1
+    goto :cleanup
+)
+
+"%NODE_EXE%" "%OPENCLAW_ENTRY%" gateway stop
+if errorlevel 1 (
+    echo [WARN] gateway stop command failed, using taskkill...
+    taskkill /F /IM node.exe /T >nul 2>&1
+)
+
+echo [OK]  OpenClaw stopped.
+
+:cleanup
+rem ============================================
+rem STEP 2: Clean up temp files
+rem ============================================
+echo.
+echo [2/2] Cleaning up...
+
+set "TEMP_DIR=%USERPROFILE%\.openclaw-portable-temp"
+if exist "%TEMP_DIR%" (
+    rmdir /s /q "%TEMP_DIR%" >nul 2>&1
+    echo [OK]  Temp files cleaned.
+) else (
+    echo [OK]  No temp files to clean.
+)
 
 echo.
-echo ========================================
-echo   ✅ 已完成：
-echo   - 数据已保存到 U盘
-echo   - 临时文件已清理
-echo   - OpenClaw 已停止
-echo ========================================
-echo.
-echo 现在可以安全拔出 U盘了~
+echo ==========================================
+echo   Done. Safe to remove USB drive.
+echo ==========================================
 echo.
 pause
