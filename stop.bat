@@ -1,10 +1,10 @@
 @echo off
 setlocal enabledelayedexpansion
-title OpenClaw Portable - 停止服务
+title OpenClaw Portable - Stop
 
 echo.
 echo ==========================================
-echo   OpenClaw Portable - 停止服务
+echo   OpenClaw Portable - Stop Service
 echo ==========================================
 echo.
 
@@ -13,81 +13,79 @@ if "%SCRIPT_DIR:~-1%"=="\" set "SCRIPT_DIR=%SCRIPT_DIR:~0,-1%"
 set "GATEWAY_PORT=18789"
 
 rem ============================================
-rem [1/3] 停止 Gateway 进程
+rem [1/3] Stop Gateway process
 rem ============================================
-echo [1/3] 停止 Gateway 进程...
+echo [1/3] Stopping Gateway...
 
-rem 方法1: 通过 API 优雅停止
+rem Method 1: Graceful stop via API
 curl -fsSL "http://localhost:%GATEWAY_PORT%/api/gateway/stop" 2>nul
 if not errorlevel 1 (
-    echo [OK]  Gateway 已通过 API 停止
+    echo [OK]  Gateway stopped via API
     timeout /t 2 /nobreak >nul
 )
 
-rem 方法2: 强制终止监听端口的进程
-for /f "tokens=5" %%a in ('netstat -aon 2^>nul ^| findstr ":%GATEWAY_PORT%" ^| findstr "LISTENING"') do (
-    echo [INFO] 终止进程 PID %%a
+rem Method 2: Force kill process on port
+for /f "tokens=5" %%a in ('netstat -aon 2^>^nul ^| findstr ":%GATEWAY_PORT%" ^| findstr "LISTENING"') do (
+    echo [INFO] Killing process PID %%a
     taskkill /F /PID %%a >nul 2>&1
 )
 
-echo [OK]  进程已停止
+echo [OK]  Process stopped
 
 rem ============================================
-rem [2/3] 清理临时文件
+rem [2/3] Cleanup temp files
 rem ============================================
 echo.
-echo [2/3] 清理临时文件...
+echo [2/3] Cleaning temp files...
 
-rem 清理 temp 目录
+rem Clean temp directory
 if exist "%SCRIPT_DIR%\temp" (
     rd /s /q "%SCRIPT_DIR%\temp" 2>nul
     mkdir "%SCRIPT_DIR%\temp"
-    echo [OK]  temp\ 已清理
+    echo [OK]  temp\ cleaned
 )
 
-rem 清理 npm 缓存（可选）
+rem Clean npm cache (optional)
 if exist "%SCRIPT_DIR%\node\npm-cache" (
     rd /s /q "%SCRIPT_DIR%\node\npm-cache" 2>nul
-    echo [OK]  npm-cache\ 已清理
+    echo [OK]  npm-cache cleaned
 )
 
-rem 清理系统临时文件（仅清理 OpenClaw 相关）
+rem Clean system temp files (OpenClaw related only)
 for %%f in ("%TEMP%\openclaw-*" "%TEMP%\node-*") do (
-    if exist "%%f" (
-        del /f /q "%%f" 2>nul
-    )
+    if exist "%%f" del /f /q "%%f" 2>nul
 )
-echo [OK]  系统临时文件已清理
+echo [OK]  System temp files cleaned
 
 rem ============================================
-rem [3/3] 验证清理结果
+rem [3/3] Verify cleanup
 rem ============================================
 echo.
-echo [3/3] 验证清理结果...
+echo [3/3] Verifying...
 
-rem 检查端口是否已释放
+rem Check if port is released
 netstat -aon 2>nul | findstr ":%GATEWAY_PORT%" | findstr "LISTENING" >nul
 if errorlevel 1 (
-    echo [OK]  端口 %GATEWAY_PORT% 已释放
+    echo [OK]  Port %GATEWAY_PORT% is released
 ) else (
-    echo [WARN] 端口 %GATEWAY_PORT% 仍在使用
-    echo        可能需要手动终止进程
+    echo [WARN] Port %GATEWAY_PORT% is still in use
+    echo        You may need to kill the process manually
 )
 
 echo.
 echo ==========================================
-echo   ✅ OpenClaw 已完全停止
+echo   OpenClaw stopped completely
 echo ==========================================
 echo.
-echo   已清理：
-echo   - Gateway 进程
-echo   - temp\ 目录
-echo   - npm 缓存
-echo   - 系统临时文件
+echo   Cleaned:
+echo   - Gateway process
+echo   - temp\ directory
+echo   - npm cache
+echo   - System temp files
 echo.
-echo   数据保留：
-echo   - data\ (配置和数据)
-echo   - workspace\ (工作空间)
-echo   - config\ (配置文件)
+echo   Preserved:
+echo   - data\ (config and data)
+echo   - workspace\ (workspace)
+echo   - config\ (config files)
 echo.
 pause

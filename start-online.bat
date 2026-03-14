@@ -5,7 +5,7 @@ title OpenClaw Portable v5.0 (Online)
 echo.
 echo ==========================================
 echo   OpenClaw Portable v5.0 - Online Edition
-echo   首次运行需联网下载依赖 (~60MB)
+echo   First run requires internet (~60MB)
 echo ==========================================
 echo.
 
@@ -18,89 +18,89 @@ set "OPENCLAW_ENTRY=%SCRIPT_DIR%\openclaw-pkg\node_modules\openclaw\bin\openclaw
 set "GATEWAY_PORT=18789"
 
 rem ============================================
-rem [1/4] 下载 Node.js（如需）
+rem [1/4] Download Node.js (if needed)
 rem ============================================
-echo [1/4] 检测 Node.js...
+echo [1/4] Checking Node.js...
 
 if exist "%NODE_EXE%" (
-    for /f "tokens=*" %%v in ('"%NODE_EXE%" --version 2^>^&1') do echo [OK]  Node.js %%v 已存在
+    for /f "tokens=*" %%v in ('"%NODE_EXE%" --version 2^>^&1') do echo [OK]  Node.js %%v already exists
     goto :check_openclaw
 )
 
-echo [INFO] Node.js 未找到，开始下载 (~30MB)...
-echo [INFO] 使用国内镜像源...
+echo [INFO] Node.js not found, downloading (~30MB)...
+echo [INFO] Using China mirror for faster download...
 
 set "NODE_URL=https://npmmirror.com/mirrors/node/v22.16.0/node-v22.16.0-win-x64.zip"
 
-rem 使用 Windows 10+ 内置的 curl.exe
+rem Use Windows 10+ built-in curl.exe
 curl -fsSL "%NODE_URL%" -o "%SCRIPT_DIR%\node.zip"
 
 if errorlevel 1 (
-    echo [ERROR] 下载失败
-    echo         请检查网络连接
+    echo [ERROR] Download failed
+    echo         Please check your internet connection
     pause
     exit /b 1
 )
 
-echo [INFO] 解压中...
+echo [INFO] Extracting...
 powershell -NoProfile -Command "Expand-Archive -Path '%SCRIPT_DIR%\node.zip' -DestinationPath '%SCRIPT_DIR%\node_tmp' -Force"
 move "%SCRIPT_DIR%\node_tmp\node-v22.16.0-win-x64" "%SCRIPT_DIR%\node"
 del /f /q "%SCRIPT_DIR%\node.zip"
 rd /s /q "%SCRIPT_DIR%\node_tmp"
 
-for /f "tokens=*" %%v in ('"%NODE_EXE%" --version 2^>^&1') do echo [OK]  Node.js %%v 下载完成
+for /f "tokens=*" %%v in ('"%NODE_EXE%" --version 2^>^&1') do echo [OK]  Node.js %%v downloaded
 
 :check_openclaw
 rem ============================================
-rem [2/4] 安装 OpenClaw（如需）
+rem [2/4] Install OpenClaw (if needed)
 rem ============================================
 echo.
-echo [2/4] 检测 OpenClaw...
+echo [2/4] Checking OpenClaw...
 
 if exist "%OPENCLAW_ENTRY%" (
-    echo [OK]  OpenClaw 已存在
+    echo [OK]  OpenClaw already exists
     goto :check_port
 )
 
-echo [INFO] OpenClaw 未找到，开始安装 (~30MB)...
-echo [INFO] 使用国内镜像源...
+echo [INFO] OpenClaw not found, installing (~30MB)...
+echo [INFO] Using China mirror for faster download...
 
 mkdir "%SCRIPT_DIR%\openclaw-pkg"
 
 "%NODE_EXE%" "%NPM_CLI%" install -g openclaw --prefix "%SCRIPT_DIR%\openclaw-pkg" --registry https://registry.npmmirror.com
 
 if errorlevel 1 (
-    echo [ERROR] 安装失败
-    echo         请检查网络连接
+    echo [ERROR] Installation failed
+    echo         Please check your internet connection
     pause
     exit /b 1
 )
 
-echo [OK]  OpenClaw 安装完成
+echo [OK]  OpenClaw installed
 
 :check_port
 rem ============================================
-rem [3/4] 检测端口
+rem [3/4] Check port
 rem ============================================
 echo.
-echo [3/4] 检测端口...
+echo [3/4] Checking port...
 
 netstat -aon 2>nul | findstr ":%GATEWAY_PORT%" | findstr "LISTENING" >nul
 if not errorlevel 1 (
-    echo [WARN] 端口 %GATEWAY_PORT% 被占用，尝试备用端口...
+    echo [WARN] Port %GATEWAY_PORT% is in use, trying backup port...
     set "GATEWAY_PORT=18790"
 )
 
-echo [OK]  使用端口 %GATEWAY_PORT%
+echo [OK]  Using port %GATEWAY_PORT%
 
 rem ============================================
-rem [4/4] 启动
+rem [4/4] Start
 rem ============================================
 echo.
-echo [4/4] 启动 OpenClaw Gateway...
+echo [4/4] Starting OpenClaw Gateway...
 echo.
-echo   访问: http://localhost:%GATEWAY_PORT%
-echo   停止: 运行 stop.bat
+echo   Access: http://localhost:%GATEWAY_PORT%
+echo   Stop: Run stop.bat
 echo.
 echo ==========================================
 echo.
@@ -111,8 +111,8 @@ if not exist "%SCRIPT_DIR%\data" mkdir "%SCRIPT_DIR%\data"
 
 echo.
 if errorlevel 1 (
-    echo [ERROR] 启动失败
+    echo [ERROR] Startup failed
 ) else (
-    echo [INFO] 已停止
+    echo [INFO] Stopped
 )
 pause
