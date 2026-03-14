@@ -1,60 +1,93 @@
 @echo off
 setlocal enabledelayedexpansion
-title OpenClaw Portable - Stop
+title OpenClaw Portable - 停止服务
 
 echo.
 echo ==========================================
-echo   OpenClaw Portable - Shutdown
+echo   OpenClaw Portable - 停止服务
 echo ==========================================
 echo.
 
 set "SCRIPT_DIR=%~dp0"
 if "%SCRIPT_DIR:~-1%"=="\" set "SCRIPT_DIR=%SCRIPT_DIR:~0,-1%"
-
-set "NODE_EXE=%SCRIPT_DIR%\node\node.exe"
-set "OPENCLAW_ENTRY=%SCRIPT_DIR%\openclaw-pkg\node_modules\openclaw\bin\openclaw"
-set "OPENCLAW_HOME=%SCRIPT_DIR%\data"
+set "GATEWAY_PORT=18789"
 
 rem ============================================
-rem STEP 1: Stop Gateway
+rem [1/3] 停止 Gateway 进程
 rem ============================================
-echo [1/2] Stopping OpenClaw Gateway...
+echo [1/3] 停止 Gateway 进程...
 
-if exist "%NODE_EXE%" (
-    if exist "%OPENCLAW_ENTRY%" (
-        "%NODE_EXE%" "%OPENCLAW_ENTRY%" gateway stop
-        if errorlevel 1 (
-            echo [WARN] gateway stop returned error, falling back to taskkill...
-            goto :taskkill_fallback
-        )
-        echo [OK]  Gateway stopped.
-        goto :cleanup
+rem 方法1: 通过 API 优雅停止
+curl -fsSL "http://localhost:%GATEWAY_PORT%/api/gateway/stop" 2>nul
+if not errorlevel 1 (
+    echo [OK]  Gateway 已通过 API 停止
+    timeout /t 2 /nobreak >nul
+)
+
+rem 方法2: 强制终止监听端口的进程
+for /f "tokens=5" %%a in ('netstat -aon 2^>nul ^| findstr ":%GATEWAY_PORT%" ^| findstr "LISTENING"') do (
+    echo [INFO] 终止进程 PID %%a
+    taskkill /F /PID %%a >nul 2>&1
+)
+
+echo [OK]  进程已停止
+
+rem ============================================
+rem [2/3] 清理临时文件
+rem ============================================
+echo.
+echo [2/3] 清理临时文件...
+
+rem 清理 temp 目录
+if exist "%SCRIPT_DIR%\temp" (
+    rd /s /q "%SCRIPT_DIR%\temp" 2>nul
+    mkdir "%SCRIPT_DIR%\temp"
+    echo [OK]  temp\ 已清理
+)
+
+rem 清理 npm 缓存（可选）
+if exist "%SCRIPT_DIR%\node\npm-cache" (
+    rd /s /q "%SCRIPT_DIR%\node\npm-cache" 2>nul
+    echo [OK]  npm-cache\ 已清理
+)
+
+rem 清理系统临时文件（仅清理 OpenClaw 相关）
+for %%f in ("%TEMP%\openclaw-*" "%TEMP%\node-*") do (
+    if exist "%%f" (
+        del /f /q "%%f" 2>nul
     )
 )
+echo [OK]  系统临时文件已清理
 
-:taskkill_fallback
-echo [INFO] Using taskkill to stop node processes...
-taskkill /F /IM node.exe /T >nul 2>&1
+rem ============================================
+rem [3/3] 验证清理结果
+rem ============================================
+echo.
+echo [3/3] 验证清理结果...
+
+rem 检查端口是否已释放
+netstat -aon 2>nul | findstr ":%GATEWAY_PORT%" | findstr "LISTENING" >nul
 if errorlevel 1 (
-    echo [INFO] No node.exe processes found (already stopped).
+    echo [OK]  端口 %GATEWAY_PORT% 已释放
 ) else (
-    echo [OK]  node.exe processes terminated.
+    echo [WARN] 端口 %GATEWAY_PORT% 仍在使用
+    echo        可能需要手动终止进程
 )
 
-:cleanup
-rem ============================================
-rem STEP 2: Clean temp files
-rem ============================================
-echo.
-echo [2/2] Cleaning up temp files...
-
-if exist "%SCRIPT_DIR%\node.zip"  del /f /q "%SCRIPT_DIR%\node.zip"  >nul 2>&1
-if exist "%SCRIPT_DIR%\node_tmp" rmdir /s /q "%SCRIPT_DIR%\node_tmp" >nul 2>&1
-
-echo [OK]  Done.
 echo.
 echo ==========================================
-echo   Safe to remove USB drive.
+echo   ✅ OpenClaw 已完全停止
 echo ==========================================
+echo.
+echo   已清理：
+echo   - Gateway 进程
+echo   - temp\ 目录
+echo   - npm 缓存
+echo   - 系统临时文件
+echo.
+echo   数据保留：
+echo   - data\ (配置和数据)
+echo   - workspace\ (工作空间)
+echo   - config\ (配置文件)
 echo.
 pause
