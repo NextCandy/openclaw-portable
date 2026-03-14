@@ -42,56 +42,30 @@ echo [WARN] node\node.exe not found.
 echo [INFO] Downloading Node.js 22.16.0 - one time only, ~30 MB...
 echo.
 
-rem Write the PowerShell script to a temp .ps1 file to avoid BAT ^ line-continuation bugs
-set "PS1=%TEMP%\openclaw_dl_node.ps1"
-(
-echo $ErrorActionPreference = 'Stop'
-echo $ver  = '22.16.0'
-echo $base = '%SCRIPT_DIR%'
-echo $zip  = Join-Path $base 'node.zip'
-echo $tmp  = Join-Path $base 'node_tmp'
-echo $mirrors = @(
-echo     'https://npmmirror.com/mirrors/node/v' + $ver + '/node-v' + $ver + '-win-x64.zip',
-echo     'https://nodejs.org/dist/v'            + $ver + '/node-v' + $ver + '-win-x64.zip'
-echo ^)
-echo $ok = $false
-echo foreach ^($url in $mirrors^) {
-echo     try {
-echo         Write-Host ^( '[INFO] Downloading from: ' + $url ^)
-echo         ^(New-Object Net.WebClient^).DownloadFile^($url, $zip^)
-echo         $ok = $true
-echo         break
-echo     } catch { Write-Host '[WARN] Mirror failed, trying next...' }
-echo }
-echo if ^(-not $ok^) { Write-Error 'All mirrors failed.'; exit 1 }
-echo Write-Host '[INFO] Extracting...'
-echo if ^(Test-Path $tmp^) { Remove-Item $tmp -Recurse -Force }
-echo Expand-Archive -Path $zip -DestinationPath $tmp -Force
-echo $sub = Get-ChildItem $tmp -Directory ^| Select-Object -First 1
-echo if ^(Test-Path ^(Join-Path $base 'node'^)^) { Remove-Item ^(Join-Path $base 'node'^) -Recurse -Force }
-echo Move-Item $sub.FullName ^(Join-Path $base 'node'^)
-echo Remove-Item $zip -Force -ErrorAction SilentlyContinue
-echo Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue
-echo Write-Host '[OK]  Node.js ready.'
-) > "%PS1%"
+rem ----------------------------------------------------------------
+rem  PowerShell download script encoded as Base64 UTF-16LE.
+rem  This completely avoids BAT/PS escaping conflicts.
+rem  The script receives SCRIPT_DIR as its first argument via -Args.
+rem  To regenerate: python3 -c "
+rem    import base64; s=open('dl_node.ps1').read()
+rem    print(base64.b64encode(s.encode('utf-16-le')).decode())"
+rem ----------------------------------------------------------------
+set B64=JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQAgAD0AIAAnAFMAdABvAHAAJwAKACQAdgBlAHIAIAAgAD0AIAAnADIAMgAuADEANgAuADAAJwAKACQAYgBhAHMAZQAgAD0AIAAkAGEAcgBnAHMAWwAwAF0ACgAkAHoAaQBwACAAIAA9ACAASgBvAGkAbgAtAFAAYQB0AGgAIAAkAGIAYQBzAGUAIAAnAG4AbwBkAGUALgB6AGkAcAAnAAoAJAB0AG0AcAAgACAAPQAgAEoAbwBpAG4ALQBQAGEAdABoACAAJABiAGEAcwBlACAAJwBuAG8AZABlAF8AdABtAHAAJwAKACQAbQBpAHIAcgBvAHIAcwAgAD0AIABAACgACgAgACAAIAAgACIAaAB0AHQAcABzADoALwAvAG4AcABtAG0AaQByAHIAbwByAC4AYwBvAG0ALwBtAGkAcgByAG8AcgBzAC8AbgBvAGQAZQAvAHYAJAB2AGUAcgAvAG4AbwBkAGUALQB2ACQAdgBlAHIALQB3AGkAbgAtAHgANgA0AC4AegBpAHAAIgAsAAoAIAAgACAAIAAiAGgAdAB0AHAAcwA6AC8ALwBuAG8AZABlAGoAcwAuAG8AcgBnAC8AZABpAHMAdAAvAHYAJAB2AGUAcgAvAG4AbwBkAGUALQB2ACQAdgBlAHIALQB3AGkAbgAtAHgANgA0AC4AegBpAHAAIgAKACkACgAkAG8AawAgAD0AIAAkAGYAYQBsAHMAZQAKAGYAbwByAGUAYQBjAGgAIAAoACQAdQByAGwAIABpAG4AIAAkAG0AaQByAHIAbwByAHMAKQAgAHsACgAgACAAIAAgAHQAcgB5ACAAewAKACAAIAAgACAAIAAgACAAIABXAHIAaQB0AGUALQBIAG8AcwB0ACAAIgBbAEkATgBGAE8AXQAgAEQAbwB3AG4AbABvAGEAZABpAG4AZwAgAGYAcgBvAG0AOgAgACQAdQByAGwAIgAKACAAIAAgACAAIAAgACAAIAAkAHcAYwAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAATgBlAHQALgBXAGUAYgBDAGwAaQBlAG4AdAAKACAAIAAgACAAIAAgACAAIAAkAHcAYwAuAEQAbwB3AG4AbABvAGEAZABGAGkAbABlACgAJAB1AHIAbAAsACAAJAB6AGkAcAApAAoAIAAgACAAIAAgACAAIAAgACQAbwBrACAAPQAgACQAdAByAHUAZQAKACAAIAAgACAAIAAgACAAIABiAHIAZQBhAGsACgAgACAAIAAgAH0AIABjAGEAdABjAGgAIAB7AAoAIAAgACAAIAAgACAAIAAgAFcAcgBpAHQAZQAtAEgAbwBzAHQAIAAiAFsAVwBBAFIATgBdACAATQBpAHIAcgBvAHIAIABmAGEAaQBsAGUAZAA6ACAAJABfACIACgAgACAAIAAgAH0ACgB9AAoAaQBmACAAKAAtAG4AbwB0ACAAJABvAGsAKQAgAHsACgAgACAAIAAgAFcAcgBpAHQAZQAtAEUAcgByAG8AcgAgACIAQQBsAGwAIABtAGkAcgByAG8AcgBzACAAZgBhAGkAbABlAGQALgAiAAoAIAAgACAAIABlAHgAaQB0ACAAMQAKAH0ACgBXAHIAaQB0AGUALQBIAG8AcwB0ACAAIgBbAEkATgBGAE8AXQAgAEUAeAB0AHIAYQBjAHQAaQBuAGcALgAuAC4AIgAKAGkAZgAgACgAVABlAHMAdAAtAFAAYQB0AGgAIAAkAHQAbQBwACkAIAB7ACAAUgBlAG0AbwB2AGUALQBJAHQAZQBtACAAJAB0AG0AcAAgAC0AUgBlAGMAdQByAHMAZQAgAC0ARgBvAHIAYwBlACAAfQAKAEEAZABkAC0AVAB5AHAAZQAgAC0AQQBzAHMAZQBtAGIAbAB5AE4AYQBtAGUAIABTAHkAcwB0AGUAbQAuAEkATwAuAEMAbwBtAHAAcgBlAHMAcwBpAG8AbgAuAEYAaQBsAGUAUwB5AHMAdABlAG0ACgBbAFMAeQBzAHQAZQBtAC4ASQBPAC4AQwBvAG0AcAByAGUAcwBzAGkAbwBuAC4AWgBpAHAARgBpAGwAZQBdADoAOgBFAHgAdAByAGEAYwB0AFQAbwBEAGkAcgBlAGMAdABvAHIAeQAoACQAegBpAHAALAAgACQAdABtAHAAKQAKACQAcwB1AGIAIAA9ACAARwBlAHQALQBDAGgAaQBsAGQASQB0AGUAbQAgACQAdABtAHAAIAAtAEQAaQByAGUAYwB0AG8AcgB5ACAAfAAgAFMAZQBsAGUAYwB0AC0ATwBiAGoAZQBjAHQAIAAtAEYAaQByAHMAdAAgADEACgAkAGQAZQBzAHQAIAA9ACAASgBvAGkAbgAtAFAAYQB0AGgAIAAkAGIAYQBzAGUAIAAnAG4AbwBkAGUAJwAKAGkAZgAgACgAVABlAHMAdAAtAFAAYQB0AGgAIAAkAGQAZQBzAHQAKQAgAHsAIABSAGUAbQBvAHYAZQAtAEkAdABlAG0AIAAkAGQAZQBzAHQAIAAtAFIAZQBjAHUAcgBzAGUAIAAtAEYAbwByAGMAZQAgAH0ACgBNAG8AdgBlAC0ASQB0AGUAbQAgACQAcwB1AGIALgBGAHUAbABsAE4AYQBtAGUAIAAkAGQAZQBzAHQACgBSAGUAbQBvAHYAZQAtAEkAdABlAG0AIAAkAHoAaQBwACAALQBGAG8AcgBjAGUAIAAtAEUAcgByAG8AcgBBAGMAdABpAG8AbgAgAFMAaQBsAGUAbgB0AGwAeQBDAG8AbgB0AGkAbgB1AGUACgBSAGUAbQBvAHYAZQAtAEkAdABlAG0AIAAkAHQAbQBwACAALQBSAGUAYwB1AHIAcwBlACAALQBGAG8AcgBjAGUAIAAtAEUAcgByAG8AcgBBAGMAdABpAG8AbgAgAFMAaQBsAGUAbgB0AGwAeQBDAG8AbgB0AGkAbgB1AGUACgBXAHIAaQB0AGUALQBIAG8AcwB0ACAAIgBbAE8ASwBdACAAIABOAG8AZABlAC4AagBzACAAcgBlAGEAZAB5ACAAYQB0ADoAIAAkAGQAZQBzAHQAIgA=
 
-powershell -NoProfile -ExecutionPolicy Bypass -File "%PS1%"
-set PS_ERR=%errorlevel%
-del /f /q "%PS1%" >nul 2>&1
-
-if %PS_ERR% neq 0 (
+powershell -NoProfile -ExecutionPolicy Bypass -EncodedCommand %B64% -Args "%SCRIPT_DIR%"
+if errorlevel 1 (
     echo.
     echo [ERROR] Failed to download Node.js.
     echo         - Check your internet connection and try again.
-    echo         - Or manually download and extract into node\ folder:
-    echo           https://nodejs.org/dist/v22.16.0/node-v22.16.0-win-x64.zip
+    echo         - Or manually download node-v22.16.0-win-x64.zip from nodejs.org
+    echo           extract it and rename the inner folder to: node\
     pause
     exit /b 1
 )
 
 if not exist "%NODE_EXE%" (
     echo [ERROR] Download finished but node.exe not found. Zip may be corrupt.
-    echo         Delete node_tmp\ and re-run.
+    echo         Delete node_tmp\ then re-run.
     pause
     exit /b 1
 )
@@ -166,33 +140,28 @@ set "OPENCLAW_HOME=%SCRIPT_DIR%\data"
 if not exist "%SCRIPT_DIR%\data"      mkdir "%SCRIPT_DIR%\data"
 if not exist "%SCRIPT_DIR%\workspace" mkdir "%SCRIPT_DIR%\workspace"
 
+rem Write minimal openclaw.json if not yet present
 if not exist "%OPENCLAW_HOME%\openclaw.json" (
     echo [INFO] Writing default openclaw.json...
-    (
-        echo {echo   "gateway": {
-        echo     "mode": "local"
-        echo   }
-        echo }
-    ) > "%OPENCLAW_HOME%\openclaw.json"
+    echo {                        > "%OPENCLAW_HOME%\openclaw.json"
+    echo   "gateway": {          >> "%OPENCLAW_HOME%\openclaw.json"
+    echo     "mode": "local"     >> "%OPENCLAW_HOME%\openclaw.json"
+    echo   }                     >> "%OPENCLAW_HOME%\openclaw.json"
+    echo }                       >> "%OPENCLAW_HOME%\openclaw.json"
 )
 
 echo [OK]  Environment ready.
 
 rem ============================================
 rem STEP 4: Run OpenClaw Gateway (FOREGROUND)
-rem
-rem  Use "gateway run" NOT "gateway start"
-rem  gateway run   = foreground process (correct for portable use)
-rem  gateway start = manage a system service (wrong here)
-rem
-rem  This window stays open with gateway logs.
-rem  DO NOT close this window while using OpenClaw.
-rem  Use stop.bat to shut down cleanly.
+rem  "gateway run"   = foreground, correct for portable use
+rem  "gateway start" = system service manager, DO NOT USE
+rem  Window stays open. Close with stop.bat.
 rem ============================================
 echo [4/4] Starting OpenClaw Gateway...
 echo.
 echo   URL  : http://localhost:%GATEWAY_PORT%
-echo   Stop : run stop.bat or close this window
+echo   Stop : run stop.bat  or  close this window
 echo.
 echo ==========================================
 echo.
@@ -201,13 +170,11 @@ echo.
 
 echo.
 if errorlevel 1 (
-    echo [ERROR] Gateway exited with error.
+    echo [ERROR] Gateway exited with error. See output above.
     echo.
-    echo  Common causes:
-    echo    1. Port %GATEWAY_PORT% already in use
-    echo       Check: netstat -aon | findstr :%GATEWAY_PORT%
-    echo    2. openclaw-pkg\ corrupted - delete folder and re-run
-    echo    3. See error output above
+    echo  Quick fixes:
+    echo    1. Port %GATEWAY_PORT% busy  ^>  netstat -aon ^| findstr :%GATEWAY_PORT%
+    echo    2. Corrupted install    ^>  delete openclaw-pkg\ then re-run
 ) else (
     echo [INFO] Gateway stopped normally.
 )
