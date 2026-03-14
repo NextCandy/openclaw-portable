@@ -40,21 +40,13 @@ echo [INFO] Data dir   : %OPENCLAW_HOME%
 echo.
 
 rem ============================================
-rem [1/5] Check Node.js (must be pre-installed in offline package)
+rem [1/5] Check Node.js
 rem ============================================
 echo [1/5] Checking Node.js...
 
 if not exist "%NODE_EXE%" (
     echo.
     echo [ERROR] node\node.exe not found!
-    echo.
-    echo This is an offline package. Node.js should be pre-installed
-    echo in the node\ directory.
-    echo.
-    echo Please make sure you downloaded the complete offline package:
-    echo   OpenClaw-Portable-v5.0.0-windows-offline.zip
-    echo.
-    echo If you are using the Bootstrap version, please use start-online.bat
     echo.
     pause
     exit /b 1
@@ -64,7 +56,7 @@ for /f "tokens=*" %%v in ('"%NODE_EXE%" --version 2^>^&1') do set NODE_VER=%%v
 echo [OK]  Node.js !NODE_VER! is ready
 
 rem ============================================
-rem [2/5] Check OpenClaw (must be pre-installed in offline package)
+rem [2/5] Check OpenClaw
 rem ============================================
 echo.
 echo [2/5] Checking OpenClaw...
@@ -73,16 +65,6 @@ if not exist "%OPENCLAW_ENTRY%" (
     echo.
     echo [ERROR] openclaw.mjs not found!
     echo.
-    echo Checked paths:
-    echo   - %OPENCLAW_ENTRY_LINUX%
-    echo   - %OPENCLAW_ENTRY_WINDOWS%
-    echo.
-    echo This is an offline package. OpenClaw should be pre-installed
-    echo in the openclaw-pkg\ directory.
-    echo.
-    echo Please make sure you downloaded the complete offline package:
-    echo   OpenClaw-Portable-v5.0.0-windows-offline-fixed4.zip
-    echo.
     pause
     exit /b 1
 )
@@ -90,7 +72,7 @@ if not exist "%OPENCLAW_ENTRY%" (
 echo [OK]  OpenClaw is ready
 
 rem ============================================
-rem [3/5] Check port availability
+rem [3/5] Check port
 rem ============================================
 echo.
 echo [3/5] Checking port...
@@ -99,14 +81,6 @@ netstat -aon 2>nul | findstr ":%GATEWAY_PORT%" | findstr "LISTENING" >nul
 if not errorlevel 1 (
     echo [WARN] Port %GATEWAY_PORT% is in use, trying backup port 18790...
     set "GATEWAY_PORT=18790"
-    
-    netstat -aon 2>nul | findstr ":18790" | findstr "LISTENING" >nul
-    if not errorlevel 1 (
-        echo [ERROR] Backup port 18790 is also in use
-        echo         Please manually change GATEWAY_PORT in start.bat
-        pause
-        exit /b 1
-    )
 )
 
 echo [OK]  Port %GATEWAY_PORT% is available
@@ -117,10 +91,15 @@ rem ============================================
 echo.
 echo [4/5] Setting up environment...
 
-rem Create required directories
 if not exist "%SCRIPT_DIR%\data" mkdir "%SCRIPT_DIR%\data"
 if not exist "%SCRIPT_DIR%\workspace" mkdir "%SCRIPT_DIR%\workspace"
 if not exist "%SCRIPT_DIR%\temp" mkdir "%SCRIPT_DIR%\temp"
+
+rem Generate access token (random 16-char hex)
+for /f "tokens=*" %%t in ('"%NODE_EXE%" -e "console.log(require('crypto').randomBytes(8).toString('hex'))" 2^>^&1') do set ACCESS_TOKEN=%%t
+
+rem Save token to file
+echo !ACCESS_TOKEN! > "%OPENCLAW_HOME%\.token"
 
 echo [OK]  Environment is ready
 
@@ -130,13 +109,27 @@ rem ============================================
 echo.
 echo [5/5] Starting OpenClaw Gateway...
 echo.
-echo   Access URL: http://localhost:%GATEWAY_PORT%
+
+rem Build access URL with token
+set "ACCESS_URL=http://localhost:%GATEWAY_PORT%/?token=!ACCESS_TOKEN!"
+
+echo   ==========================================
+echo   Access URL (with token):
+echo   !ACCESS_URL!
+echo   ==========================================
+echo.
+echo   Token: !ACCESS_TOKEN!
+echo   Saved to: %OPENCLAW_HOME%\.token
+echo.
 echo   To stop: Run stop.bat or close this window
 echo.
 echo ==========================================
 echo.
 
-rem Start with --allow-unconfigured to skip setup
+rem Auto-open browser after 3 seconds (in background)
+start "" cmd /c "timeout /t 3 /nobreak >nul && start !ACCESS_URL!"
+
+rem Start OpenClaw Gateway
 "%NODE_EXE%" "%OPENCLAW_ENTRY%" gateway run --allow-unconfigured
 
 rem === Exit handling ===
@@ -147,7 +140,6 @@ if errorlevel 1 (
     echo Common causes:
     echo   1. Port %GATEWAY_PORT% is in use
     echo   2. Antivirus blocking - add to whitelist
-    echo   3. Missing dependencies - try start-online.bat
     echo.
 ) else (
     echo [INFO] OpenClaw stopped normally
