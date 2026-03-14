@@ -134,16 +134,71 @@ openclaw-portable/
 
 ---
 
-## 📊 Comparison with Alternatives
+## 📊 Comparison: Portable vs Traditional Install
 
-| Solution | Offline | Portable | Fast Setup | Privacy |
-|----------|---------|----------|------------|---------|
-| **OpenClaw Portable** | ✅ 99% | ✅ USB | ✅ 60s | ✅ Zero traces |
-| Traditional Install | ❌ No | ❌ No | ❌ 10-30min | ❌ Traces |
-| Cloud AI (ChatGPT) | ❌ No | ❌ No | ✅ Fast | ❌ Data on cloud |
-| Local LLM | ✅ Yes | ❌ No | ❌ Slow | ✅ Local |
+### Traditional OpenClaw Installation
 
-**OpenClaw Portable: Best of all worlds.**
+**The Pain:**
+```bash
+# Step 1: Install Node.js (10-15 min)
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# Step 2: Install OpenClaw (5-10 min)
+npm install -g openclaw
+
+# Step 3: Configure (5-10 min)
+openclaw config init
+# Edit config files...
+
+# Step 4: Repeat on every new device!
+```
+
+**Problems:**
+- ❌ Requires stable internet (500MB+ download)
+- ❌ VPN needed in restricted regions
+- ❌ Reinstall on every new machine
+- ❌ Data scattered across devices
+- ❌ Traces left on shared computers
+- ❌ 10-30 minutes setup time
+
+### OpenClaw Portable
+
+**The Solution:**
+```bash
+# Step 1: Extract (1 min)
+unzip OpenClaw-Portable-v4.1.0.zip
+
+# Step 2: Run (30s)
+./start.sh
+
+# Done! 🎉
+```
+
+**Benefits:**
+- ✅ Zero downloads (everything pre-installed)
+- ✅ Works offline (99% of the time)
+- ✅ USB portability (your AI everywhere)
+- ✅ Data syncs automatically
+- ✅ Zero traces on exit
+- ✅ 60 seconds to start
+
+### Side-by-Side Comparison
+
+| Feature | Traditional Install | OpenClaw Portable |
+|---------|-------------------|-------------------|
+| **Setup Time** | 10-30 minutes | **60 seconds** |
+| **Network Required** | ✅ Yes (500MB+ download) | ❌ **No** |
+| **VPN Needed (China)** | ✅ Yes | ❌ **No** |
+| **Switch Devices** | ❌ Reinstall every time | ✅ **Just plug USB** |
+| **Data Portability** | ❌ Manual sync | ✅ **Automatic** |
+| **Privacy (Shared PC)** | ❌ Traces left | ✅ **Zero traces** |
+| **Config Persistence** | ❌ Per-device | ✅ **USB-based** |
+| **Node.js Install** | ✅ Required | ❌ **Pre-installed** |
+| **OpenClaw Install** | ✅ Required | ❌ **Pre-installed** |
+| **Offline Usage** | ❌ No | ✅ **99% offline** |
+
+**The Verdict:** OpenClaw Portable eliminates all the friction of traditional installation while adding portability and privacy.
 
 ---
 
