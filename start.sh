@@ -53,9 +53,8 @@ if [ -d "/Volumes" ]; then
     done
 fi
 
-# 检测当前目录（如果在 openclaw-portable 目录中）
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-if [[ "$SCRIPT_DIR" == *"/openclaw-portable" ]] && [ -f "$SCRIPT_DIR/start.sh" ]; then
+# 检测当前目录（基于内容指纹，不依赖特定目录名）
+if [ -f "$SCRIPT_DIR/start.sh" ] && [ -d "$SCRIPT_DIR/node" ] && [ -d "$SCRIPT_DIR/npm-global" ]; then
     CURRENT_USB=$(dirname "$SCRIPT_DIR")
     
     # 检查是否已经在列表中

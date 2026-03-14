@@ -80,9 +80,13 @@ if %USB_COUNT% gtr 1 (
     set "USB_ROOT=%CURRENT_DIR%"
 )
 
-:: 转换为 WSL 路径
-set "DRIVE_LETTER=%USB_ROOT:~0,1%"
-set "WSL_USB=/mnt/%DRIVE_LETTER%/openclaw-portable"
+:: 转换为 WSL 路径（动态计算，支持任意目录名）
+set "SCRIPT_FULL=%~dp0"
+set "SCRIPT_FULL=%SCRIPT_FULL:~0,-1%"
+set "DRIVE_LETTER=%SCRIPT_FULL:~0,1%"
+set "SCRIPT_PATH=%SCRIPT_FULL:~2%"
+set "SCRIPT_PATH=%SCRIPT_PATH:\=/%"
+set "WSL_USB=/mnt/%DRIVE_LETTER%%SCRIPT_PATH%"
 
 echo.
 echo [信息] 使用 U盘: %USB_ROOT%
