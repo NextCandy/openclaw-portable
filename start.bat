@@ -16,9 +16,9 @@ rem === Path configuration ===
 set "NODE_EXE=%SCRIPT_DIR%\node\node.exe"
 set "NPM_CLI=%SCRIPT_DIR%\node\node_modules\npm\bin\npm-cli.js"
 
-rem Try both possible OpenClaw paths (Linux npm vs Windows npm)
-set "OPENCLAW_ENTRY_LINUX=%SCRIPT_DIR%\openclaw-pkg\lib\node_modules\openclaw\bin\openclaw"
-set "OPENCLAW_ENTRY_WINDOWS=%SCRIPT_DIR%\openclaw-pkg\node_modules\openclaw\bin\openclaw"
+rem OpenClaw entry file (openclaw.mjs, NOT bin/openclaw)
+set "OPENCLAW_ENTRY_LINUX=%SCRIPT_DIR%\openclaw-pkg\lib\node_modules\openclaw\openclaw.mjs"
+set "OPENCLAW_ENTRY_WINDOWS=%SCRIPT_DIR%\openclaw-pkg\node_modules\openclaw\openclaw.mjs"
 
 if exist "%OPENCLAW_ENTRY_LINUX%" (
     set "OPENCLAW_ENTRY=%OPENCLAW_ENTRY_LINUX%"
@@ -71,7 +71,7 @@ echo [2/5] Checking OpenClaw...
 
 if not exist "%OPENCLAW_ENTRY%" (
     echo.
-    echo [ERROR] openclaw not found!
+    echo [ERROR] openclaw.mjs not found!
     echo.
     echo Checked paths:
     echo   - %OPENCLAW_ENTRY_LINUX%
@@ -81,7 +81,7 @@ if not exist "%OPENCLAW_ENTRY%" (
     echo in the openclaw-pkg\ directory.
     echo.
     echo Please make sure you downloaded the complete offline package:
-    echo   OpenClaw-Portable-v5.0.0-windows-offline-fixed.zip
+    echo   OpenClaw-Portable-v5.0.0-windows-offline-fixed3.zip
     echo.
     pause
     exit /b 1
