@@ -194,7 +194,8 @@ export OPENCLAW_CONFIG_DIR="$TEMP_DIR"
 export HOME="$TEMP_DIR"
 
 # 检查是否已在运行
-if openclaw gateway status &>/dev/null | grep -q "running"; then
+STATUS=$(openclaw gateway status 2>/dev/null || true)
+if echo "$STATUS" | grep -q "running"; then
     echo -e "${YELLOW}⚠️  OpenClaw 已在运行，跳过启动${NC}"
 else
     openclaw gateway start

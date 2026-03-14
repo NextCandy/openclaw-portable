@@ -32,7 +32,8 @@ echo ""
 # ============================================
 echo -e "${BLUE}[1/4] 停止 OpenClaw 服务...${NC}"
 
-if openclaw gateway status &>/dev/null | grep -q "running"; then
+STATUS=$(openclaw gateway status 2>/dev/null || true)
+if echo "$STATUS" | grep -q "running"; then
     openclaw gateway stop
     echo -e "${GREEN}✅ OpenClaw 已停止${NC}"
 else

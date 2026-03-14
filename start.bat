@@ -1,5 +1,6 @@
 @echo off
 chcp 65001 >nul
+setlocal enabledelayedexpansion
 title OpenClaw Portable - 智能启动
 
 echo.
