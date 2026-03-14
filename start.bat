@@ -97,43 +97,40 @@ if not exist "%SCRIPT_DIR%\temp" mkdir "%SCRIPT_DIR%\temp"
 echo [OK]  Environment is ready
 
 rem ============================================
-rem [5/5] Start OpenClaw Gateway
+rem [5/5] Start OpenClaw Gateway and Dashboard
 rem ============================================
 echo.
 echo [5/5] Starting OpenClaw Gateway...
 echo.
-echo   ==========================================
-echo   Access URL: http://localhost:%GATEWAY_PORT%
-echo   ==========================================
+
+rem Start Gateway in background
+start /b "" "%NODE_EXE%" "%OPENCLAW_ENTRY%" gateway run --allow-unconfigured
+
+rem Wait for gateway to start
+echo   Waiting for Gateway to start...
+timeout /t 5 /nobreak >nul
+
+rem Get dashboard URL with token
 echo.
-echo   Instructions:
-echo   1. Wait for Gateway to start (5-10 seconds)
-echo   2. Browser will open automatically
-echo   3. If prompted for token, check the console output
-echo      or look in: %OPENCLAW_HOME%\.token
+echo   Getting dashboard URL with token...
+echo.
+
+for /f "tokens=*" %%u in ('"%NODE_EXE%" "%OPENCLAW_ENTRY%" dashboard --no-open 2^>^&1') do set DASHBOARD_URL=%%u
+
+echo   ==========================================
+echo   Access URL (with token):
+echo   !DASHBOARD_URL!
+echo   ==========================================
 echo.
 echo   To stop: Run stop.bat or close this window
 echo.
 echo ==========================================
 echo.
 
-rem Auto-open browser after 5 seconds
-start "" cmd /c "timeout /t 5 /nobreak >nul && start http://localhost:%GATEWAY_PORT%"
+rem Auto-open browser
+start !DASHBOARD_URL!
 
-rem Start OpenClaw Gateway (foreground)
-"%NODE_EXE%" "%OPENCLAW_ENTRY%" gateway run --allow-unconfigured
-
-rem === Exit handling ===
-echo.
-if errorlevel 1 (
-    echo [ERROR] OpenClaw exited with an error
-    echo.
-    echo Common causes:
-    echo   1. Port %GATEWAY_PORT% is in use
-    echo   2. Antivirus blocking - add to whitelist
-    echo.
-) else (
-    echo [INFO] OpenClaw stopped normally
-)
-echo.
-pause
+rem Keep window open (monitor gateway process)
+:loop
+timeout /t 60 /nobreak >nul
+goto loop
