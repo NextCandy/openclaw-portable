@@ -14,9 +14,8 @@ if "%SCRIPT_DIR:~-1%"=="\" set "SCRIPT_DIR=%SCRIPT_DIR:~0,-1%"
 
 rem === Path configuration ===
 set "NODE_EXE=%SCRIPT_DIR%\node\node.exe"
-set "NPM_CLI=%SCRIPT_DIR%\node\node_modules\npm\bin\npm-cli.js"
 
-rem OpenClaw entry file (openclaw.mjs, NOT bin/openclaw)
+rem OpenClaw entry file
 set "OPENCLAW_ENTRY_LINUX=%SCRIPT_DIR%\openclaw-pkg\lib\node_modules\openclaw\openclaw.mjs"
 set "OPENCLAW_ENTRY_WINDOWS=%SCRIPT_DIR%\openclaw-pkg\node_modules\openclaw\openclaw.mjs"
 
@@ -32,7 +31,7 @@ if exist "%OPENCLAW_ENTRY_LINUX%" (
 
 set "OPENCLAW_HOME=%SCRIPT_DIR%\data"
 set "GATEWAY_PORT=18789"
-set "PATH=%SCRIPT_DIR%\node;%SCRIPT_DIR%\openclaw-pkg\node_modules\.bin;%SCRIPT_DIR%\openclaw-pkg\lib\node_modules\.bin;%PATH%"
+set "PATH=%SCRIPT_DIR%\node;%PATH%"
 
 echo [INFO] Script dir : %SCRIPT_DIR%
 echo [INFO] Node dir   : %SCRIPT_DIR%\node
@@ -86,7 +85,7 @@ if not errorlevel 1 (
 echo [OK]  Port %GATEWAY_PORT% is available
 
 rem ============================================
-rem [4/5] Setup environment
+rem [4/5] Setup environment and generate token
 rem ============================================
 echo.
 echo [4/5] Setting up environment...
@@ -95,8 +94,16 @@ if not exist "%SCRIPT_DIR%\data" mkdir "%SCRIPT_DIR%\data"
 if not exist "%SCRIPT_DIR%\workspace" mkdir "%SCRIPT_DIR%\workspace"
 if not exist "%SCRIPT_DIR%\temp" mkdir "%SCRIPT_DIR%\temp"
 
-rem Generate access token (random 16-char hex)
-for /f "tokens=*" %%t in ('"%NODE_EXE%" -e "console.log(require('crypto').randomBytes(8).toString('hex'))" 2^>^&1') do set ACCESS_TOKEN=%%t
+rem Generate random token using %RANDOM%
+set "ACCESS_TOKEN="
+set "ACCESS_TOKEN=!ACCESS_TOKEN!%RANDOM:~-2%"
+set "ACCESS_TOKEN=!ACCESS_TOKEN!%RANDOM:~-2%"
+set "ACCESS_TOKEN=!ACCESS_TOKEN!%RANDOM:~-2%"
+set "ACCESS_TOKEN=!ACCESS_TOKEN!%RANDOM:~-2%"
+set "ACCESS_TOKEN=!ACCESS_TOKEN!%RANDOM:~-2%"
+set "ACCESS_TOKEN=!ACCESS_TOKEN!%RANDOM:~-2%"
+set "ACCESS_TOKEN=!ACCESS_TOKEN!%RANDOM:~-2%"
+set "ACCESS_TOKEN=!ACCESS_TOKEN!%RANDOM:~-2%"
 
 rem Save token to file
 echo !ACCESS_TOKEN! > "%OPENCLAW_HOME%\.token"
@@ -109,13 +116,9 @@ rem ============================================
 echo.
 echo [5/5] Starting OpenClaw Gateway...
 echo.
-
-rem Build access URL with token
-set "ACCESS_URL=http://localhost:%GATEWAY_PORT%/?token=!ACCESS_TOKEN!"
-
 echo   ==========================================
 echo   Access URL (with token):
-echo   !ACCESS_URL!
+echo   http://localhost:%GATEWAY_PORT%/?token=!ACCESS_TOKEN!
 echo   ==========================================
 echo.
 echo   Token: !ACCESS_TOKEN!
@@ -126,8 +129,8 @@ echo.
 echo ==========================================
 echo.
 
-rem Auto-open browser after 3 seconds (in background)
-start "" cmd /c "timeout /t 3 /nobreak >nul && start !ACCESS_URL!"
+rem Auto-open browser after 3 seconds
+start "" cmd /c "timeout /t 3 /nobreak >nul && start http://localhost:%GATEWAY_PORT%/?token=!ACCESS_TOKEN!"
 
 rem Start OpenClaw Gateway
 "%NODE_EXE%" "%OPENCLAW_ENTRY%" gateway run --allow-unconfigured
