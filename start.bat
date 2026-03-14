@@ -85,7 +85,7 @@ if not errorlevel 1 (
 echo [OK]  Port %GATEWAY_PORT% is available
 
 rem ============================================
-rem [4/5] Setup environment and generate token
+rem [4/5] Setup environment
 rem ============================================
 echo.
 echo [4/5] Setting up environment...
@@ -93,20 +93,6 @@ echo [4/5] Setting up environment...
 if not exist "%SCRIPT_DIR%\data" mkdir "%SCRIPT_DIR%\data"
 if not exist "%SCRIPT_DIR%\workspace" mkdir "%SCRIPT_DIR%\workspace"
 if not exist "%SCRIPT_DIR%\temp" mkdir "%SCRIPT_DIR%\temp"
-
-rem Generate random token using %RANDOM%
-set "ACCESS_TOKEN="
-set "ACCESS_TOKEN=!ACCESS_TOKEN!%RANDOM:~-2%"
-set "ACCESS_TOKEN=!ACCESS_TOKEN!%RANDOM:~-2%"
-set "ACCESS_TOKEN=!ACCESS_TOKEN!%RANDOM:~-2%"
-set "ACCESS_TOKEN=!ACCESS_TOKEN!%RANDOM:~-2%"
-set "ACCESS_TOKEN=!ACCESS_TOKEN!%RANDOM:~-2%"
-set "ACCESS_TOKEN=!ACCESS_TOKEN!%RANDOM:~-2%"
-set "ACCESS_TOKEN=!ACCESS_TOKEN!%RANDOM:~-2%"
-set "ACCESS_TOKEN=!ACCESS_TOKEN!%RANDOM:~-2%"
-
-rem Save token to file
-echo !ACCESS_TOKEN! > "%OPENCLAW_HOME%\.token"
 
 echo [OK]  Environment is ready
 
@@ -116,36 +102,56 @@ rem ============================================
 echo.
 echo [5/5] Starting OpenClaw Gateway...
 echo.
+echo   Gateway is starting...
+echo   Waiting for token generation...
+echo.
+
+rem Start OpenClaw Gateway in background and capture output
+start /b "" "%NODE_EXE%" "%OPENCLAW_ENTRY%" gateway run --allow-unconfigured
+
+rem Wait for gateway to start and generate token (max 10 seconds)
+set TOKEN_FILE=%OPENCLAW_HOME%\.token
+set TOKEN_WAIT=0
+
+:wait_for_token
+if exist "%TOKEN_FILE%" goto :got_token
+timeout /t 1 /nobreak >nul
+set /a TOKEN_WAIT+=1
+if !TOKEN_WAIT! geq 10 goto :timeout
+goto :wait_for_token
+
+:got_token
+rem Read token from file
+set /p ACCESS_TOKEN=<"%TOKEN_FILE%"
+
 echo   ==========================================
 echo   Access URL (with token):
 echo   http://localhost:%GATEWAY_PORT%/?token=!ACCESS_TOKEN!
 echo   ==========================================
 echo.
 echo   Token: !ACCESS_TOKEN!
-echo   Saved to: %OPENCLAW_HOME%\.token
+echo   Saved to: %TOKEN_FILE%
 echo.
 echo   To stop: Run stop.bat or close this window
 echo.
 echo ==========================================
 echo.
 
-rem Auto-open browser after 3 seconds
-start "" cmd /c "timeout /t 3 /nobreak >nul && start http://localhost:%GATEWAY_PORT%/?token=!ACCESS_TOKEN!"
+rem Auto-open browser
+start http://localhost:%GATEWAY_PORT%/?token=!ACCESS_TOKEN!
 
-rem Start OpenClaw Gateway
-"%NODE_EXE%" "%OPENCLAW_ENTRY%" gateway run --allow-unconfigured
-
-rem === Exit handling ===
+rem Keep window open
+echo Gateway is running. Close this window to stop.
 echo.
-if errorlevel 1 (
-    echo [ERROR] OpenClaw exited with an error
-    echo.
-    echo Common causes:
-    echo   1. Port %GATEWAY_PORT% is in use
-    echo   2. Antivirus blocking - add to whitelist
-    echo.
-) else (
-    echo [INFO] OpenClaw stopped normally
-)
+pause
+goto :eof
+
+:timeout
+echo.
+echo [WARN] Timeout waiting for token
+echo        Gateway may still be starting...
+echo.
+echo   Access URL: http://localhost:%GATEWAY_PORT%
+echo   Token file: %TOKEN_FILE%
 echo.
 pause
