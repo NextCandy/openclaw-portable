@@ -102,40 +102,58 @@ rem ============================================
 echo.
 echo [5/5] Starting OpenClaw Gateway...
 echo.
-echo   ==========================================
-echo   Access URL: http://localhost:%GATEWAY_PORT%
-echo   ==========================================
-echo.
-echo   The Gateway will generate a token on first start.
-echo   Look for this message in the output below:
-echo.
-echo     [gateway] auth token was missing. Generated a new token...
-echo.
-echo   Then visit http://localhost:%GATEWAY_PORT% in your browser
-echo   and enter the token when prompted.
+
+rem Start Gateway in background
+start /b "" "%NODE_EXE%" "%OPENCLAW_ENTRY%" gateway run --allow-unconfigured
+
+rem Wait for Gateway to start and generate token
+echo   Waiting for Gateway to start...
+timeout /t 6 /nobreak >nul
+
+rem Extract token from config file
+set "CONFIG_FILE=%OPENCLAW_HOME%\.openclaw\openclaw.json"
+set "TOKEN_FILE=%OPENCLAW_HOME%\token.txt"
+
+if exist "%CONFIG_FILE%" (
+    echo   Extracting token from config...
+    
+    rem Use Node.js to extract token from JSON
+    for /f "tokens=*" %%t in ('"%NODE_EXE%" -e "try { const fs = require('fs'); const config = JSON.parse(fs.readFileSync('%CONFIG_FILE%', 'utf8')); console.log(config.gateway?.auth?.token || ''); } catch (e) { console.log(''); }" 2^>^&1') do set ACCESS_TOKEN=%%t
+    
+    if not "!ACCESS_TOKEN!"=="" (
+        rem Save token to file
+        echo !ACCESS_TOKEN! > "%TOKEN_FILE%"
+        
+        echo.
+        echo   ==========================================
+        echo   Access URL (with token):
+        echo   http://localhost:%GATEWAY_PORT%/?token=!ACCESS_TOKEN!
+        echo   ==========================================
+        echo.
+        echo   Token: !ACCESS_TOKEN!
+        echo   Saved to: %TOKEN_FILE%
+        echo.
+        
+        rem Auto-open browser with token
+        start http://localhost:%GATEWAY_PORT%/?token=!ACCESS_TOKEN!
+    ) else (
+        echo   [WARN] Could not extract token from config
+        echo   Token file: %TOKEN_FILE%
+        start http://localhost:%GATEWAY_PORT%
+    )
+) else (
+    echo   [WARN] Config file not found yet
+    echo   Config: %CONFIG_FILE%
+    start http://localhost:%GATEWAY_PORT%
+)
+
 echo.
 echo   To stop: Run stop.bat or close this window
 echo.
 echo ==========================================
 echo.
 
-rem Auto-open browser after 8 seconds
-start "" cmd /c "timeout /t 8 /nobreak >nul && start http://localhost:%GATEWAY_PORT%"
-
-rem Start OpenClaw Gateway (foreground)
-"%NODE_EXE%" "%OPENCLAW_ENTRY%" gateway run --allow-unconfigured
-
-rem === Exit handling ===
-echo.
-if errorlevel 1 (
-    echo [ERROR] OpenClaw exited with an error
-    echo.
-    echo Common causes:
-    echo   1. Port %GATEWAY_PORT% is in use
-    echo   2. Antivirus blocking - add to whitelist
-    echo.
-) else (
-    echo [INFO] OpenClaw stopped normally
-)
-echo.
-pause
+rem Keep window open (monitor gateway process)
+:loop
+timeout /t 60 /nobreak >nul
+goto loop
