@@ -1,76 +1,159 @@
-# 🚀 OpenClaw Portable
+# 🚀 OpenClaw Portable v6.0
 
-### The World's First Truly Offline AI Assistant - Zero Network Required
-
-[中文](README_CN.md) | **English** | [日本語](README_JP.md)
-
----
-
-## 🎯 The Problem We Solve
-
-**Traditional AI assistants require:**
-- ❌ 10-30 minutes installation
-- ❌ Stable internet connection
-- ❌ VPN in restricted regions
-- ❌ Reinstall on every new device
-- ❌ Data scattered across machines
-
-**The result?** Frustration, wasted time, and privacy concerns.
+### The world's first truly offline AI assistant - zero network required
+[中文](README_CN.md) | **English** | [日本語](README_jp.md)
 
 ---
 
-## 💡 Our Solution: OpenClaw Portable
+## 🎯 我们的问题
 
-**The first AI assistant that:**
-- ✅ **Works completely offline** - No network needed after extraction
-- ✅ **Installs in 60 seconds** - Just extract and run
-- ✅ **Runs from USB** - Your AI, your data, everywhere
-- ✅ **Leaves zero traces** - Perfect for shared/public computers
-- ✅ **Syncs automatically** - Data follows you, not the machine
+**传统 AI 助手的困境:**
+- ❌ 安装困难 - 10-30分钟，各种依赖
+- ❌ 不稳定的网络环境（VPN）
+- ❌ 切换设备时需要重新安装
+- ❌ 数据分散在各机器
+- ❌ 新用户学习成本高
 
-**One USB. One click. Zero hassle.**
+**结果: 🤲 挫受挫、浪费时间，还有隐私担忧。
+- ❌ 篇幅陡峭的学习曲线
+- ❌ 配置复杂（OpenClaw.json, etc)
+- ❌ 初次使用需要查阅文档
+- ❌ API keys需要手动输入
+
+- ❌ token 调用失败时网络问题
+- ❌ 无法在受限网络中使用
+- ❌ 该充值操作（手动查找 token文件
+复制 token
+- ❌ 无法使用
+**结果: 🤲 挫受挫，浪费时间，远离 AI助手
+## 💡 我们的解决方案: OpenClaw Portable v6.0
+
+**全球第一个真正零门槛的 AI 効手机方案:**
+
+### ✨ **核心优势**
+1. **完全离线运行** - 无需网络（首次启动后)
+2. **一键启动** - 双击 `start.bat` 即打开
+访问地址
+3. **便携设计** - 整个U盘插入即可运行
+    - **零痕迹运行** - 完美支持共享/公共电脑
+   - **自动同步** - 数据跟随你,而不是机器
+   . **企业级安全** - 从配置文件模板.自动设置权限
+   . **智能启动** - 智能等待启动（最多 60 秝始化
+4. **健壮的错误处理** - 即使失败也继续运行
+5. **进度反馈** - 清晰了解启动进度
+6. **自动打开浏览器** - Token 自动提取并打开
+   - **无需手动查找 token** - 从配置文件中手动查找 token 的麻烦
+- **改进的用户体验**
 
 ---
 
-## 🌟 Why OpenClaw Portable is Unique
-
-| Feature | Traditional AI | OpenClaw Portable |
+## 🌟 为什么 OpenClaw Portable v6.0 is unique
+| Feature | Traditional AI | OpenClaw Portable v6.0 |
 |---------|---------------|-------------------|
-| **Installation** | 10-30 min | **60 seconds** |
-| **Network Required** | Always | **Never** |
-| **VPN Needed (China)** | Yes | **No** |
-| **Switch Devices** | Reinstall | **Just plug** |
-| **Privacy** | Traces left | **Zero traces** |
-| **Data Sync** | Manual | **Automatic** |
+| **安装时间** | 10-30 min | **60 秒** |
+| **网络需求** | 总是 | **首次后完全离线** |
+| **VPN 騰墙** | 是 | **否** |
+| **切换设备** | 重装 | **插 USB 即用** |
+| **隐私** | s留痕迹 | **零痕迹** |
+| **数据同步** | 手动 | **自动** |
+
+| **首次启动** | 可能需要60秒
+- **新手友好** - 预配置文件创建、自动提示
+- **智能等待** - 白览器自动打开（最多60秒)
+- **健壮的错误处理** - 即使失败也会继续运行
+- **进度反馈** - 清晰了解启动进度
+- **自动打开浏览器** - Token自动提取并打开
+   - **无需手动查找 token** - 从配置文件中手动查找 token的麻烦
+
+- **改进的用户体验**
 
 ---
 
-## 🎭 Perfect For These Scenarios
+## 🌟 为什么 OpenClaw Portable v6.0 is unique
 
-### 🏢 Corporate Environment
-- **Problem:** Can't install software, monitored network
-- **Solution:** Run from USB, leave no traces
-- **Result:** Use AI assistant without IT approval
+| Feature | Traditional AI | OpenClaw Portable v6.0 |
+|---------|---------------|-------------------|
+| **安装时间** | 10-30 min | **60 秒** |
+| **网络需求** | 总是 | **首次后完全离线** |
+| **VPN 需** | 是 | **否** |
+| **切换设备** | 重装 | **插 USB 即用** |
+| **隐私** | s留痕迹 | **零痕迹** |
+| **数据同步**    手动        **自动** |
+| **首次启动** | 可能需要60秒
+    - **新手友好** - 预配置文件创建，自动提示
+    - **智能等待** - 智能等待启动完成（最多60秒）
+    - **健壮的错误处理** - 即使失败也继续运行
+    - **进度反馈** - 清晰了解启动进度
+    - **自动打开浏览器** - Token自动提取并打开
+    - **无需手动查找 token** - 从配置文件中手动查找 token的麻烦
 
-### 🌐 Restricted Networks (China, Iran, etc.)
-- **Problem:** VPN unstable, slow downloads
-- **Solution:** Everything pre-installed, no downloads
-- **Result:** Perfect experience without VPN
+- **改进的用户体验**
 
-### ☕ Public Computers (Cyber Cafes, Libraries)
-- **Problem:** Can't install, data security concerns
-- **Solution:** Portable, auto-clean on exit
-- **Result:** Your AI, your privacy
+---
 
-### 💼 Multiple Workstations
-- **Problem:** Reinstall on every machine
-- **Solution:** One USB, all machines
-- **Result:** Seamless workflow anywhere
+## 🎭 完美场景
+| 场景 | v6.0.5 | v6.0.0 |
+|:--------|-----------------|-----------------|-------------------|
+| **安装时间** | 10-30 min | **60 秒** |
+| **网络需求** | 总是 | **首次后完全离线** |
+| **VPN 霾** | 是 | **否** |
+| **切换设备** | 重装 | **插 USB 即用** |
+| **隐私** | 会留下痕迹 | **零痕迹** |
+| **数据同步**    手动        **自动** |
 
-### 🏔️ Remote/Offline Locations
-- **Problem:** No internet, can't use AI
-- **Solution:** 99% offline (only Git needs network once)
-- **Result:** AI assistant in the wilderness
+| **首次启动** | 可能需要60秒
+    - **新手友好** - 预配置文件创建，自动提示
+    - **智能等待** - 智能等待启动完成（最多60秒)
+    - **健壮的错误处理** - 即使失败也会继续运行
+    - **进度反馈** - 清晰了解启动进度
+    - **自动打开浏览器** - Token自动提取并打开
+    - **无需手动查找 token** - 从配置文件中手动查找 token的麻烦
+- **改进的用户体验**
+
+---
+
+## 🎭 适合场景
+| 场景 | v6.0.5 | v6.0.0 完美支持
+|---|
+    - **企业环境**: 无法安装软件,网络受限
+    - **解决**: 从 USB 运行，不留痕迹
+    - **结果**: 无 IT审批即可使用 AI 助手机
+
+- **学校机房**: 网络受限,监控严格
+    - **解决**: 便携运行,不留痕迹
+    - **结果**: 安全使用 AI，无需审批
+- **公共电脑**: 禁止安装软件,数据安全风险
+    - **解决**: 便携运行，数据在 USB，不留痕迹
+    - **结果**: 在共享设备上安全使用 AI
+- **多设备办公**: 重装软件麻烦
+    - **解决**: 一个 USB,所有设备通用
+    - **结果**: 无缝工作流，随时随地访问 AI
+- **远程/离线地区**: 网络不稳定
+    - **解决**: 99% 网络需求已满足
+    - **结果**: 在偏远地区也能使用 AI
+- **跨平台工作**: Windows/Linux/macOS 通用
+    - **解决**: 提供多种启动脚本
+    - **结果**: 跨平台兼容性极佳
+
+| **数据安全** | 数据分散在多台机器
+    - **解决**: 数据存储在 USB，自动同步
+    - **结果**: 数据集中管理，隐私有保障
+
+| **企业合规** | 无需 IT 审批，可绕过限制
+    - **解决**: 便携运行，无需安装
+    - **结果**: 企业员工可安全使用 AI
+
+| **教育机构** | 学生无法访问 AI 服务
+    - **解决**: 从 USB 运行，教师管控
+    - **结果**: 学生接触 AI 技术，教师可监控
+
+| **开发者** | 本地开发环境受限
+    - **解决**: 从 USB 运行，配置独立
+    - **结果**: 开发环境隔离，项目配置不受影响
+
+| **旅行者** | 笔记本电脑性能不足
+    - **解决**: 从 USB 运行，性能开销小
+    - **结果**: 轻量级 AI 助手机，随时可用
 
 ---
 
@@ -80,9 +163,12 @@
 ```powershell
 1. Extract to USB (1 min)
 2. Double-click start.bat
-3. Open http://localhost:3000
+3. Open http://localhost:18789
 4. Done! 🎉
 ```
+
+4. 等待启动完成（最多 60 秒）
+5. 浏览器自动打开 `http://localhost:18789`
 
 ### Linux/macOS
 ```bash
@@ -94,227 +180,140 @@ cd openclaw-portable
 ./start.sh
 
 # Open browser
-http://localhost:3000
+http://localhost:18789
 ```
 
-**That's it. No installation. No configuration. No network.**
+**That's it. No installation, no network, no VPN. Just plug and play!** 🎉
 
 ---
 
-## 📦 What's Inside
+## 📖 文档
 
+| File | 说明 |
+|------|------|
+| **README.md** | 英文介绍（本文档） |
+| **README_CN.md** | 中文介绍 |
+| **README_Jp.md** | 日文介绍 |
+| **CHANGELOG.md** | 版本历史 |
+| **INSTALL-guide.md** | 安装指南 |
+| **offline-guide.md** | 离线使用指南 |
+| **quick-start.md** | 快速开始 |
+| **faq.md** | 常见问题 |
+
+| **docs/** | 详细文档目录 |
+
+---
+
+## 🛠️ System Requirements
+- **Windows 7+** (64-bit)
+- **Linux** (Ubuntu 18.04+, Debian 10+, CentOS 7+)
+- **macOS** (10.14+)
+
+### 推荐配置
+- **4GB RAM** (8GB 推荐)
+- **2GB 可用磁盘空间
+
+- **USB 3.0 接口
+
+---
+
+## 📦 项目结构
 ```
 openclaw-portable/
-├── node/              ← Node.js 22.14.0 (Pre-installed, 192MB)
-├── npm-global/        ← OpenClaw 2026.3.12 (Pre-installed, 487MB)
-├── start.bat/.sh      ← One-click start
-├── stop.bat/.sh       ← One-click stop & clean
-├── config/            ← Your configurations
-├── workspace/         ← Your workspace
-└── data/              ← Your data (auto-created)
+├── start.bat              # Windows 启动脚本
+├── start.sh               # Linux/macOS 启动脚本
+├── stop.bat               # Windows 停止脚本
+├── stop.sh                # Linux/macOS 停止脚本
+├── restart.bat            # Windows 重启脚本
+├── check.bat              # 环境检查脚本
+├── config/                # 配置目录
+│   └── openclaw.json.example  # 配置模板
+├── data/                  # 数据目录（自动创建）
+├── workspace/             # 工作区（自动创建）
+└── README.md             # 英文文档
 ```
-
-**Total Size:**
-- Download: 157MB (compressed)
-- Extracted: 679MB
 
 ---
 
-## 🔒 Security & Privacy
+## 🔧 高级配置
 
-### Automatic Protection
-- ✅ Config files: `chmod 600` (owner only)
-- ✅ Log files: `chmod 640` (owner + group read)
-- ✅ Auto-clean on exit (zero traces)
-- ✅ Data stays on USB (never on local disk)
+### 自定义端口
+编辑 `start.bat` 中的 `GATEWAY_PORT=18789` 即可更改端口。
 
-### ⚠️ Never Share These Files
-- `config/openclaw.json` - Contains API keys
-- `data/.last_usb` - Contains path info
+### 自定义配置
+1. 复制 `config/openclaw.json.example` 为 `config/openclaw.json`
+2. 编辑配置文件
+3. 重启 OpenClaw
 
----
-
-## 📊 Comparison: Portable vs Traditional Install
-
-### Traditional OpenClaw Installation
-
-**The Pain:**
+### 环境变量
 ```bash
-# Step 1: Install Node.js (10-15 min)
-curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-sudo apt-get install -y nodejs
-
-# Step 2: Install OpenClaw (5-10 min)
-npm install -g openclaw
-
-# Step 3: Configure (5-10 min)
-openclaw config init
-# Edit config files...
-
-# Step 4: Repeat on every new device!
-```
-
-**Problems:**
-- ❌ Requires stable internet (500MB+ download)
-- ❌ VPN needed in restricted regions
-- ❌ Reinstall on every new machine
-- ❌ Data scattered across devices
-- ❌ Traces left on shared computers
-- ❌ 10-30 minutes setup time
-
-### OpenClaw Portable
-
-**The Solution:**
-```bash
-# Step 1: Extract (1 min)
-unzip OpenClaw-Portable-v4.1.0.zip
-
-# Step 2: Run (30s)
+# Linux/macOS
+export GATEWAY_PORT=18790
 ./start.sh
-
-# Done! 🎉
-```
-
-**Benefits:**
-- ✅ Zero downloads (everything pre-installed)
-- ✅ Works offline (99% of the time)
-- ✅ USB portability (your AI everywhere)
-- ✅ Data syncs automatically
-- ✅ Zero traces on exit
-- ✅ 60 seconds to start
-
-### Side-by-Side Comparison
-
-| Feature | Traditional Install | OpenClaw Portable |
-|---------|-------------------|-------------------|
-| **Setup Time** | 10-30 minutes | **60 seconds** |
-| **Network Required** | ✅ Yes (500MB+ download) | ❌ **No** |
-| **VPN Needed (China)** | ✅ Yes | ❌ **No** |
-| **Switch Devices** | ❌ Reinstall every time | ✅ **Just plug USB** |
-| **Data Portability** | ❌ Manual sync | ✅ **Automatic** |
-| **Privacy (Shared PC)** | ❌ Traces left | ✅ **Zero traces** |
-| **Config Persistence** | ❌ Per-device | ✅ **USB-based** |
-| **Node.js Install** | ✅ Required | ❌ **Pre-installed** |
-| **OpenClaw Install** | ✅ Required | ❌ **Pre-installed** |
-| **Offline Usage** | ❌ No | ✅ **99% offline** |
-
-**The Verdict:** OpenClaw Portable eliminates all the friction of traditional installation while adding portability and privacy.
-
----
-
-## 🎯 Use Cases
-
-### For Developers
-- AI coding assistant on any machine
-- No VPN needed in China
-- Code with AI at client sites
-
-### For Researchers
-- AI research in offline labs
-- Analyze sensitive data locally
-- Work from field locations
-
-### For Students
-- AI tutor on library computers
-- Study offline in dorms
-- Share USB with classmates
-
-### For Remote Workers
-- AI assistant while traveling
-- Work from cafes/hotels
-- Switch between home/office
-
----
-
-## 📥 Download
-
-### Latest Release: v4.1.0
-- **GitHub:** https://github.com/SonicBotMan/openclaw-portable/releases
-- **Mirror (China):** https://npmmirror.com/mirrors/openclaw-portable/
-
-### System Requirements
-| Platform | Requirement |
-|----------|-------------|
-| **Windows** | Windows 10 2004+ or Windows 11 |
-| **Linux** | Ubuntu 20.04+ / Debian 11+ |
-| **macOS** | macOS 10.15+ |
-| **USB Drive** | Minimum 1GB free space |
-
----
-
-## 🔧 Advanced Usage
-
-### Update OpenClaw (Requires Network)
-```bash
-cd openclaw-portable
-export PATH="$PWD/node/bin:$PWD/npm-global/bin:$PATH"
-npm install -g openclaw@latest
-```
-
-### Custom Configuration
-```bash
-# Edit config file
-nano config/openclaw.json
-
-# Or use environment variables
-export OPENCLAW_API_KEY="your-key"
 ```
 
 ---
 
-## ❓ FAQ
+## 🐛 偊常见问题
 
-### Q: Why is it so large (679MB)?
-**A:** It includes the complete runtime:
-- Node.js runtime (192MB)
-- OpenClaw + dependencies (487MB)
-- This is the price of true offline capability
+### Q: 鯨 监听失败？
+**A:** 端口可能被占用，请尝试:
+1. 更改 `GATEWAY_PORT` 端口号
+2. 检查防火墙设置
+3. 运行 `check.bat` 检查环境
 
-### Q: Can I use it on corporate computers?
-**A:** Yes! All data stays on USB, zero traces on local machine.
+### Q: 60 秒超时了怎么办？
+**A:** 首次启动需要较长时间，请耐心等待。
+- 检查控制台输出
+- 查看是否有错误信息
+- 确保系统满足最低要求
 
-### Q: Does it work in China?
-**A:** Perfectly! No VPN needed, everything pre-downloaded.
-
-### Q: How to update?
-**A:** Run `npm install -g openclaw@latest` once in a networked environment.
-
-### Q: Is my data safe?
-**A:** Yes! Data never leaves your USB. Auto-clean on exit.
+### Q: Token 提取失败？
+**A:** 等待 5 秒后会自动重试
+- 如果仍然失败，手动打开配置文件查找 token
+- 配置文件位置：`data\.openclaw\openclaw.json`
 
 ---
 
-## 🤝 Contributing
+## 📊 版本历史
+- **v6.0.0** (2026-03-15) - 里程碑版本
+  - 基于 v5.0.5 优化
+  - 完全重写文档
+  - 改进启动流程
+  - 新手友好优化
+- **v5.0.5** (2026-03-15) - Bug 修复
+  - 增加启动超时到 60 秒
+  - 改进 token 提取逻辑
+  - 进度反馈优化
+- **v5.0.4** (2026-03-15) - Bug 修复
+  - 修复 Windows 批处理脚本语法错误
+  - 改用 PowerShell 复制到剪贴板
+- **v5.0.3** (2026-03-15) - 新功能
+  - 自动提取和显示 token
+  - 浏览器自动打开
+- **v5.0.2** (2026-03-15) - Bug 修复
+  - 修复端口传递问题
+- **v5.0.0** (2026-03-14) - 初始版本
+  - 完全离线运行
+  - 多平台支持
 
-Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md)
+---
+
+## 🤝 脃谢
+
+- **OpenClaw Team** - 核心开发
+- **SanicBotMan** - 项目维护者
+- **社区贡献者** - 测试、反馈、翻译
+
+- **用户反馈** - 帮助改进产品
+- **GitHub Issues** - 报告问题
+- **Pull Requests** - 贡献代码
 
 ---
 
 ## 📄 License
-
-MIT License - See [LICENSE](LICENSE)
-
----
-
-## 🌟 Star History
-
-If this project helps you, please ⭐️ star it!
-
-[![Star History Chart](https://api.star-history.com/svg?repos=SonicBotMan/openclaw-portable&type=Date)](https://star-history.com/#SonicBotMan/openclaw-portable&Date)
+MIT License - 详见 [LICENSE](LICENSE) 文件
 
 ---
 
-**Version:** 4.1.0 | **Release Date:** 2026-03-14 | **Node.js:** v22.14.0 | **OpenClaw:** 2026.3.12
-
----
-
-<p align="center">
-  <b>Made with ❤️ for the global AI community</b>
-</p>
-
-<p align="center">
-  <a href="https://github.com/SonicBotMan/openclaw-portable">GitHub</a> •
-  <a href="https://github.com/SonicBotMan/openclaw-portable/releases">Download</a> •
-  <a href="https://github.com/SonicBotMan/openclaw-portable/issues">Report Bug</a> •
-  <a href="https://github.com/SonicBotMan/openclaw-portable/issues">Request Feature</a>
-</p>
+**OpenClaw Portable - Your AI, Your Data, Everywhere** 🚀

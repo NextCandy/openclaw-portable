@@ -1,10 +1,10 @@
 @echo off
 setlocal enabledelayedexpansion
-title OpenClaw Portable v5.0.5
+title OpenClaw Portable v6.0.0
 
 echo.
 echo ==========================================
-echo   OpenClaw Portable v5.0.5 - Offline Edition
+echo   OpenClaw Portable v6.0.0 - Offline Edition
 echo ==========================================
 echo.
 

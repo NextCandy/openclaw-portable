@@ -1,5 +1,5 @@
 #!/bin/bash
-# OpenClaw Portable - 智能启动脚本（修复版 v5.0.3）
+# OpenClaw Portable - 智能启动脚本（修复版 v6.0.0）
 # 使用方法：./start.sh
 
 # ✅ Fix 1: 立即定义 SCRIPT_DIR
@@ -17,7 +17,7 @@ CYAN='\033[0;36m'
 NC='\033[0m'
 
 echo -e "${GREEN}╔════════════════════════════════════════╗${NC}"
-echo -e "${GREEN}║    OpenClaw Portable v5.0.3            ║${NC}"
+echo -e "${GREEN}║    OpenClaw Portable v6.0.0            ║${NC}"
 echo -e "${GREEN}║        Smart Launcher (Fixed)          ║${NC}"
 echo -e "${GREEN}╚════════════════════════════════════════╝${NC}"
 echo ""

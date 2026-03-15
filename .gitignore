@@ -58,3 +58,4 @@ yarn-error.log*
 *.iml
 .task-card.md
 .review.md
+dist/
