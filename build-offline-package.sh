@@ -63,9 +63,31 @@ echo "[5/7] 下载内置模型 (Qwen2.5-1.5B, ~900MB)..."
 LLM_MODEL_DIR="${OUTDIR}/llm/models"
 mkdir -p "$LLM_MODEL_DIR"
 
-if [ ! -f "$LLM_MODEL_DIR/$MODEL_NAME" ]; then
+MODEL_FILE="$LLM_MODEL_DIR/qwen2.5-1.5b-instruct-q4_k_m.gguf"
+
+if [ ! -f "$MODEL_FILE" ]; then
     echo "   ⏳ 下载中，请耐心等待..."
-    curl -L --progress-bar -o "$LLM_MODEL_DIR/$MODEL_NAME" "$MODEL_URL"
+    
+    # 方式 1: 从 GitHub Release 下载（更快）
+    if [ "$USE_GITHUB_MODEL" = "true" ] || [ "$1" = "--github" ]; then
+        echo "   📦 从 GitHub Release 下载..."
+        cd "$LLM_MODEL_DIR"
+        curl -L --progress-bar -o part1.bin \
+          "https://github.com/SonicBotMan/openclaw-portable/releases/download/v6.0.0/qwen-model-part1.bin"
+        curl -L --progress-bar -o part2.bin \
+          "https://github.com/SonicBotMan/openclaw-portable/releases/download/v6.0.0/qwen-model-part2.bin"
+        curl -L --progress-bar -o part3.bin \
+          "https://github.com/SonicBotMan/openclaw-portable/releases/download/v6.0.0/qwen-model-part3.bin"
+        
+        echo "   🔧 合并模型文件..."
+        cat part1.bin part2.bin part3.bin > qwen2.5-1.5b-instruct-q4_k_m.gguf
+        rm -f part*.bin
+        cd - > /dev/null
+    else
+        # 方式 2: 从 HuggingFace 下载
+        curl -L --progress-bar -o "$MODEL_FILE" "$MODEL_URL"
+    fi
+    
     echo "   ✓ Qwen2.5-1.5B-Instruct Q4_K_M 已下载"
 else
     echo "   ✓ 模型已存在，跳过下载"

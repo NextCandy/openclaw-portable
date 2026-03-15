@@ -24,8 +24,44 @@ jobs:
         run: |
           git config --global core.autocrlf false
 
+      - name: Download model from GitHub Release
+        shell: bash
+        run: |
+          echo "=========================================="
+          echo "  Downloading Qwen2.5-1.5B Model"
+          echo "=========================================="
+
+          mkdir -p llm/models
+          cd llm/models
+
+          # Download all parts
+          echo "📦 Downloading part 1/3 (500MB)..."
+          curl -L -o part1.bin \
+            "https://github.com/SonicBotMan/openclaw-portable/releases/download/v6.0.0/qwen-model-part1.bin"
+
+          echo "📦 Downloading part 2/3 (500MB)..."
+          curl -L -o part2.bin \
+            "https://github.com/SonicBotMan/openclaw-portable/releases/download/v6.0.0/qwen-model-part2.bin"
+
+          echo "📦 Downloading part 3/3 (66MB)..."
+          curl -L -o part3.bin \
+            "https://github.com/SonicBotMan/openclaw-portable/releases/download/v6.0.0/qwen-model-part3.bin"
+
+          # Merge parts
+          echo "🔧 Merging parts..."
+          cat part1.bin part2.bin part3.bin > qwen2.5-1.5b-instruct-q4_k_m.gguf
+
+          # Clean up
+          rm -f part*.bin
+
+          # Verify
+          SIZE=$(du -h qwen2.5-1.5b-instruct-q4_k_m.gguf | cut -f1)
+          echo "✅ Model downloaded and merged: $SIZE"
+
       - name: Build offline package
         shell: bash
+        env:
+          SKIP_MODEL_DOWNLOAD: 'true'
         run: |
           echo "=========================================="
           echo "  Building OpenClaw Portable v6.0.0"
@@ -35,7 +71,7 @@ jobs:
           # Make script executable
           chmod +x build-offline-package.sh
 
-          # Run build script
+          # Run build script (skip model download)
           ./build-offline-package.sh
 
       - name: Get package info
