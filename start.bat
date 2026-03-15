@@ -1,10 +1,10 @@
 @echo off
 setlocal enabledelayedexpansion
-title OpenClaw Portable v5.0.3
+title OpenClaw Portable v5.0.4
 
 echo.
 echo ==========================================
-echo   OpenClaw Portable v5.0.3 - Offline Edition
+echo   OpenClaw Portable v5.0.4 - Offline Edition
 echo ==========================================
 echo.
 
@@ -182,8 +182,8 @@ if defined GATEWAY_TOKEN (
     echo   Token: !GATEWAY_TOKEN!
     echo.
     
-    rem Copy token to clipboard (Windows Vista+)
-    echo !GATEWAY_TOKEN! | clip >nul 2>&1
+    rem Copy token to clipboard using PowerShell (more reliable)
+    powershell -NoProfile -Command "Set-Clipboard -Value '!GATEWAY_TOKEN!'" 2>nul
     if not errorlevel 1 (
         echo   [OK] Token copied to clipboard
     ) else (
@@ -191,7 +191,7 @@ if defined GATEWAY_TOKEN (
     )
     
     echo.
-    echo   Direct link (with token):
+    echo   Direct link with token:
     echo   http://localhost:%GATEWAY_PORT%?token=!GATEWAY_TOKEN!
     echo.
     
@@ -199,7 +199,7 @@ if defined GATEWAY_TOKEN (
     start http://localhost:%GATEWAY_PORT%?token=!GATEWAY_TOKEN!
 ) else (
     echo   [INFO] Token not found in config file
-    echo   You can find it in: %CONFIG_FILE%
+    echo   Config path: %CONFIG_FILE%
     echo.
     
     rem Auto-open browser without token
@@ -212,7 +212,7 @@ echo   To stop: Close this window or press Ctrl+C
 echo ==========================================
 echo.
 
-rem Keep the window open and show logs
+rem Keep the window open
 :keep_running
 timeout /t 60 /nobreak >nul
 goto :keep_running
