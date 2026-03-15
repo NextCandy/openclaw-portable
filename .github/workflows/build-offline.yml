@@ -1,0 +1,71 @@
+name: Build Offline Package (Windows)
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      upload_to_release:
+        description: 'Upload to latest release'
+        required: false
+        default: 'true'
+        type: boolean
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Git Bash
+        run: |
+          git config --global core.autocrlf false
+
+      - name: Build offline package
+        shell: bash
+        run: |
+          echo "=========================================="
+          echo "  Building OpenClaw Portable v6.0.0"
+          echo "  Platform: Windows x64"
+          echo "=========================================="
+
+          # Make script executable
+          chmod +x build-offline-package.sh
+
+          # Run build script
+          ./build-offline-package.sh
+
+      - name: Get package info
+        id: package
+        shell: bash
+        run: |
+          FILE=$(ls dist/*.tar.gz | head -1)
+          SIZE=$(du -h "$FILE" | cut -f1)
+          echo "file=$FILE" >> $GITHUB_OUTPUT
+          echo "size=$SIZE" >> $GITHUB_OUTPUT
+          echo "=========================================="
+          echo "  ✅ Build Complete!"
+          echo "=========================================="
+          echo "  File: $FILE"
+          echo "  Size: $SIZE"
+
+      - name: Upload to Release
+        if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && github.event.inputs.upload_to_release == 'true')
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v6.0.0
+          files: ${{ steps.package.outputs.file }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifact (manual trigger)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-offline-package
+          path: ${{ steps.package.outputs.file }}
+          retention-days: 30
+          compression-level: 0  # Already compressed
