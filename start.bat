@@ -5,6 +5,7 @@ title OpenClaw Portable v6.0.0
 echo.
 echo ==========================================
 echo   OpenClaw Portable v6.0.0 - Offline Edition
+echo   Built-in Local Model Support
 echo ==========================================
 echo.
 
@@ -29,6 +30,7 @@ if exist "%OPENCLAW_ENTRY_LINUX%" (
 
 set "OPENCLAW_HOME=%SCRIPT_DIR%\data"
 set "GATEWAY_PORT=18789"
+set "LLM_PORT=18080"
 set "PATH=%SCRIPT_DIR%\node;%PATH%"
 
 echo [INFO] Script dir : %SCRIPT_DIR%
@@ -37,9 +39,9 @@ echo [INFO] Data dir   : %OPENCLAW_HOME%
 echo.
 
 rem ============================================
-rem [1/5] Check Node.js
+rem [1/6] Check Node.js
 rem ============================================
-echo [1/5] Checking Node.js...
+echo [1/6] Checking Node.js...
 
 if not exist "%NODE_EXE%" (
     echo.
@@ -58,10 +60,10 @@ for /f "tokens=*" %%v in ('"%NODE_EXE%" --version 2^>^&1') do set NODE_VER=%%v
 echo [OK]  Node.js !NODE_VER! is ready
 
 rem ============================================
-rem [2/5] Check OpenClaw
+rem [2/6] Check OpenClaw
 rem ============================================
 echo.
-echo [2/5] Checking OpenClaw...
+echo [2/6] Checking OpenClaw...
 
 if not exist "%OPENCLAW_ENTRY%" (
     echo.
@@ -77,10 +79,46 @@ if not exist "%OPENCLAW_ENTRY%" (
 echo [OK]  OpenClaw is ready
 
 rem ============================================
-rem [3/5] Check port availability
+rem [NEW 3/6] Start bundled llama-server
 rem ============================================
 echo.
-echo [3/5] Checking port...
+echo [3/6] Starting bundled local model...
+
+set "LLM_BIN=%SCRIPT_DIR%\llm\bin\llama-server-win32-avx2.exe"
+set "LLM_MODEL=%SCRIPT_DIR%\llm\models\qwen2.5-1.5b-instruct-q4_k_m.gguf"
+set "LLM_LOG=%SCRIPT_DIR%\llm\server.log"
+set LLM_BUNDLED_READY=0
+
+if exist "%LLM_BIN%" if exist "%LLM_MODEL%" (
+    rem Check if port is already in use
+    netstat -ano 2>nul | findstr ":%LLM_PORT%" | findstr "LISTENING" >nul
+    if errorlevel 1 (
+        rem Calculate threads (logical processors - 1, min 1)
+        for /f "tokens=2" %%i in ('wmic cpu get NumberOfLogicalProcessors /value ^| find "="') do set /a THREADS=%%i-1
+        if !THREADS! LSS 1 set THREADS=1
+        
+        rem Start llama-server in background
+        start /b "" "%LLM_BIN%" --model "%LLM_MODEL%" --port %LLM_PORT% --host 127.0.0.1 --ctx-size 32768 --threads !THREADS! --parallel 1 -ngl 0 --log-disable >> "%LLM_LOG%" 2>&1
+        
+        echo [OK]  llama-server started on port %LLM_PORT% (threads: !THREADS!)
+        echo [INFO] Model loading, first response may take 5-15 seconds...
+        set LLM_BUNDLED_READY=1
+    ) else (
+        echo [OK]  Bundled model already running on port %LLM_PORT%
+        set LLM_BUNDLED_READY=1
+    )
+) else (
+    echo [WARN] Bundled model not found, skipping (cloud API still available)
+    echo [INFO] Model path: %LLM_MODEL%
+    echo [INFO] Binary path: %LLM_BIN%
+    set LLM_BUNDLED_READY=0
+)
+
+rem ============================================
+rem [4/6] Check port availability
+rem ============================================
+echo.
+echo [4/6] Checking port...
 
 netstat -aon 2>nul | findstr ":%GATEWAY_PORT%" | findstr "LISTENING" >nul
 if not errorlevel 1 (
@@ -98,30 +136,52 @@ if not errorlevel 1 (
 echo [OK]  Port %GATEWAY_PORT% is available
 
 rem ============================================
-rem [4/5] Setup environment
+rem [5/6] Setup environment
 rem ============================================
 echo.
-echo [4/5] Setting up environment...
+echo [5/6] Setting up environment...
 
 if not exist "%SCRIPT_DIR%\data" mkdir "%SCRIPT_DIR%\data"
 if not exist "%SCRIPT_DIR%\workspace" mkdir "%SCRIPT_DIR%\workspace"
 if not exist "%SCRIPT_DIR%\temp" mkdir "%SCRIPT_DIR%\temp"
+if not exist "%SCRIPT_DIR%\llm" mkdir "%SCRIPT_DIR%\llm"
 
 echo [OK]  Environment is ready
 
+rem [NEW] Inject bundled model config
+if !LLM_BUNDLED_READY! EQU 1 (
+    echo.
+    echo [5.5/6] Configuring bundled model...
+    
+    rem Check if user has configured a primary model
+    "%NODE_EXE%" -e "try{const cfg=JSON.parse(require('fs').readFileSync('%OPENCLAW_HOME%\.openclaw\openclaw.json','utf8'));console.log(cfg?.agents?.defaults?.model?.primary?'yes':'no')}catch(e){console.log('no')}" >nul 2>&1
+    if errorlevel 1 (
+        set HAS_PRIMARY=no
+    ) else (
+        for /f "tokens=*" %%i in ('"%NODE_EXE%" -e "try{const cfg=JSON.parse(require('fs').readFileSync('%OPENCLAW_HOME%\.openclaw\openclaw.json','utf8'));console.log(cfg?.agents?.defaults?.model?.primary?'yes':'no')}catch(e){console.log('no')}" 2^>^&1') do set HAS_PRIMARY=%%i
+    )
+    
+    rem Inject bundled model configuration
+    "%NODE_EXE%" -e "const fs=require('fs');const cfg=fs.existsSync('%OPENCLAW_HOME%\.openclaw\openclaw.json')?JSON.parse(fs.readFileSync('%OPENCLAW_HOME%\.openclaw\openclaw.json','utf8')):{};cfg.models=cfg.models||{};cfg.models.providers=cfg.models.providers||{};cfg.models.providers['bundled-local']={baseUrl:'http://127.0.0.1:18080/v1',apiKey:'bundled-no-key',api:'openai-completions',models:[{id:'qwen2.5-1.5b',name:'Qwen2.5 1.5B (Bundled CPU)',contextWindow:32768,maxTokens:4096,cost:{input:0,output:0}}]};cfg.agents=cfg.agents||{};cfg.agents.defaults=cfg.agents.defaults||{};cfg.agents.defaults.model=cfg.agents.defaults.model||{};if('%HAS_PRIMARY%'==='no'){cfg.agents.defaults.model.primary='bundled-local/qwen2.5-1.5b';console.log('default')}else{console.log('fallback')};fs.writeFileSync('%OPENCLAW_HOME%\.openclaw\openclaw.json',JSON.stringify(cfg,null,2))" 2>nul
+    
+    if "!HAS_PRIMARY!"=="no" (
+        echo [OK]  bundled-local/qwen2.5-1.5b set as default model
+    ) else (
+        echo [INFO] Primary model already configured, bundled model as fallback
+    )
+)
+
 rem ============================================
-rem [5/5] Start OpenClaw Gateway
+rem [6/6] Start OpenClaw Gateway
 rem ============================================
 echo.
-echo [5/5] Starting OpenClaw Gateway...
+echo [6/6] Starting OpenClaw Gateway...
 echo.
 
 rem Start OpenClaw Gateway (background)
 start /b "" "%NODE_EXE%" "%OPENCLAW_ENTRY%" gateway run --port %GATEWAY_PORT% --allow-unconfigured
 
-rem ============================================
-rem Wait for Gateway to be ready (up to 60 seconds)
-rem ============================================
+rem Wait for startup (max 60 seconds)
 echo [INFO] Waiting for Gateway to start...
 echo [INFO] This may take up to 60 seconds on first run...
 echo.
@@ -154,7 +214,7 @@ if exist "%CONFIG_FILE%" (
     )
 )
 
-rem Ready if both port is listening AND (token found OR waited 30+ seconds)
+rem Ready if port is listening AND (token found OR waited 30+ seconds)
 if !GATEWAY_READY! EQU 1 (
     if defined GATEWAY_TOKEN goto :gateway_ready
     if !WAIT_COUNT! GEQ 30 goto :gateway_ready
@@ -247,6 +307,15 @@ if defined GATEWAY_TOKEN (
         echo   Opening browser without token...
         start http://localhost:%GATEWAY_PORT%
     )
+)
+
+echo.
+
+rem Display model status
+if !LLM_BUNDLED_READY! EQU 1 (
+    echo   Model: qwen2.5-1.5b (port %LLM_PORT%)
+) else (
+    echo   Model: Using cloud API
 )
 
 echo.
