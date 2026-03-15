@@ -65,7 +65,13 @@ mkdir -p "$LLM_MODEL_DIR"
 
 MODEL_FILE="$LLM_MODEL_DIR/qwen2.5-1.5b-instruct-q4_k_m.gguf"
 
-if [ ! -f "$MODEL_FILE" ]; then
+# 检查模型是否已存在（GitHub Actions 预下载）
+if [ -f "llm/models/qwen2.5-1.5b-instruct-q4_k_m.gguf" ]; then
+    echo "   ✓ 检测到预下载的模型，移动到目标位置..."
+    mv llm/models/qwen2.5-1.5b-instruct-q4_k_m.gguf "$MODEL_FILE"
+elif [ -f "$MODEL_FILE" ]; then
+    echo "   ✓ 模型已存在，跳过下载"
+else
     echo "   ⏳ 下载中，请耐心等待..."
     
     # 方式 1: 从 GitHub Release 下载（更快）
@@ -89,8 +95,6 @@ if [ ! -f "$MODEL_FILE" ]; then
     fi
     
     echo "   ✓ Qwen2.5-1.5B-Instruct Q4_K_M 已下载"
-else
-    echo "   ✓ 模型已存在，跳过下载"
 fi
 
 # 复制启动脚本和配置
