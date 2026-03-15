@@ -33,7 +33,7 @@ export OPENCLAW_CONFIG_DIR="$TEMP_DIR"
 # ============================================
 # 1. 停止 OpenClaw
 # ============================================
-echo -e "${BLUE}[1/4] 停止 OpenClaw 服务...${NC}"
+echo -e "${BLUE}[1/5] 停止 OpenClaw 服务...${NC}"
 
 STATUS=$(openclaw gateway status 2>/dev/null || true)
 if echo "$STATUS" | grep -q "running"; then
@@ -46,9 +46,31 @@ fi
 echo ""
 
 # ============================================
-# 2. 保存数据到 U盘
+# [NEW] 2. 停止内置 llama-server
 # ============================================
-echo -e "${BLUE}[2/4] 保存数据到 U盘...${NC}"
+echo -e "${BLUE}[2/5] 停止内置本地模型...${NC}"
+
+LLM_PID_FILE="$USB_PATH/llm/server.pid"
+
+if [ -f "$LLM_PID_FILE" ]; then
+    LLM_PID=$(cat "$LLM_PID_FILE")
+    if kill -0 "$LLM_PID" 2>/dev/null; then
+        kill "$LLM_PID"
+        echo -e "${GREEN}✅ 内置模型已停止 (PID: $LLM_PID)${NC}"
+    else
+        echo -e "${YELLOW}⚠️  内置模型进程不存在${NC}"
+    fi
+    rm -f "$LLM_PID_FILE"
+else
+    echo -e "${YELLOW}⚠️  未找到内置模型 PID 文件${NC}"
+fi
+
+echo ""
+
+# ============================================
+# 3. 保存数据到 U盘
+# ============================================
+echo -e "${BLUE}[3/5] 保存数据到 U盘...${NC}"
 
 mkdir -p "$DATA_DIR"
 
@@ -80,9 +102,9 @@ find "$DATA_DIR" -name "*.log" -exec chmod 640 {} \; 2>/dev/null || true
 echo ""
 
 # ============================================
-# 3. 清理本地痕迹
+# 4. 清理本地痕迹
 # ============================================
-echo -e "${BLUE}[3/4] 清理本地痕迹...${NC}"
+echo -e "${BLUE}[4/5] 清理本地痕迹...${NC}"
 
 # 清理临时目录
 if [ -d "$TEMP_DIR" ]; then
@@ -106,9 +128,9 @@ echo -e "${GREEN}✅ 旧日志已清理${NC}"
 echo ""
 
 # ============================================
-# 4. 完成提示
+# 5. 完成提示
 # ============================================
-echo -e "${BLUE}[4/4] 完成${NC}"
+echo -e "${BLUE}[5/5] 完成${NC}"
 echo ""
 
 echo -e "${GREEN}╔════════════════════════════════════════╗${NC}"

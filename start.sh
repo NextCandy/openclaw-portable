@@ -1,12 +1,9 @@
 #!/bin/bash
-# OpenClaw Portable - 智能启动脚本（修复版 v6.0.0）
-# 使用方法：./start.sh
+# OpenClaw Portable v6.0.0 - 智能启动脚本
+# 支持：内置本地模型 (llama.cpp + Qwen2.5-1.5B)
 
-# ✅ Fix 1: 立即定义 SCRIPT_DIR
+# ✅ 立即定义 SCRIPT_DIR
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-# ✅ Fix 4: 去掉 set -e，改为手动错误处理
-# set -e  # 已删除
 
 # 颜色输出
 RED='\033[0;31m'
@@ -18,14 +15,14 @@ NC='\033[0m'
 
 echo -e "${GREEN}╔════════════════════════════════════════╗${NC}"
 echo -e "${GREEN}║    OpenClaw Portable v6.0.0            ║${NC}"
-echo -e "${GREEN}║        Smart Launcher (Fixed)          ║${NC}"
+echo -e "${GREEN}║   🚀 Built-in Local Model Support      ║${NC}"
 echo -e "${GREEN}╚════════════════════════════════════════╝${NC}"
 echo ""
 
 # ============================================
-# 1. 检测所有 U盘
+# 1/6 检测 U盘
 # ============================================
-echo -e "${BLUE}[1/5] 检测 U盘...${NC}"
+echo -e "${BLUE}[1/6] 检测 U盘...${NC}"
 echo ""
 
 USB_LIST=()
@@ -57,7 +54,7 @@ if [ -d "/Volumes" ]; then
     done
 fi
 
-# ✅ Fix 1: 检测当前目录（SCRIPT_DIR 已正确定义）
+# 检测当前目录
 if [ -f "$SCRIPT_DIR/start.sh" ] && [ -d "$SCRIPT_DIR/node" ]; then
     CURRENT_USB=$(dirname "$SCRIPT_DIR")
     
@@ -77,9 +74,7 @@ if [ -f "$SCRIPT_DIR/start.sh" ] && [ -d "$SCRIPT_DIR/node" ]; then
     fi
 fi
 
-# ============================================
-# 2. 选择 U盘（如果找到多个）
-# ============================================
+# 选择 U盘
 if [ "$USB_COUNT" -eq 0 ]; then
     echo -e "${RED}❌ 未检测到 U盘！${NC}"
     echo ""
@@ -108,10 +103,10 @@ else
 fi
 
 # ============================================
-# 3. 设置环境变量
+# 2/6 设置环境
 # ============================================
 echo ""
-echo -e "${BLUE}[2/5] 设置环境...${NC}"
+echo -e "${BLUE}[2/6] 设置环境...${NC}"
 echo ""
 
 CONFIG_DIR="$USB_PATH/config"
@@ -141,32 +136,15 @@ else
     exit 1
 fi
 
-# ✅ Fix 3: Git 检测（多平台 + 优雅失败）
-if ! command -v git &> /dev/null; then
-    echo -e "${YELLOW}⚠️  Git 未安装，尝试自动安装...${NC}"
-    
-    if command -v apt-get &> /dev/null; then
-        sudo apt-get install -y git 2>/dev/null || true
-    elif command -v yum &> /dev/null; then
-        sudo yum install -y git 2>/dev/null || true
-    elif command -v brew &> /dev/null; then
-        brew install git 2>/dev/null || true
-    fi
-    
-    # 再检查一次，如果还没有就告诉用户手动装
-    if ! command -v git &> /dev/null; then
-        echo -e "${YELLOW}⚠️  Git 自动安装失败，部分功能可能受限${NC}"
-        echo -e "${YELLOW}    请手动安装 Git: https://git-scm.com/downloads${NC}"
-        echo -e "${YELLOW}    基本 AI 对话功能不受影响，继续启动...${NC}"
-    else
-        echo -e "${GREEN}✅ Git: $(git --version | cut -d' ' -f3)${NC}"
-    fi
-else
+# Git 检测（可选）
+if command -v git &> /dev/null; then
     echo -e "${GREEN}✅ Git: $(git --version | cut -d' ' -f3)${NC}"
+else
+    echo -e "${YELLOW}⚠️  Git 未安装，部分功能可能受限${NC}"
 fi
 
 # ============================================
-# [NEW] 3/6 启动内置本地模型 (llama-server)
+# 3/6 启动内置本地模型 (llama-server)
 # ============================================
 echo ""
 echo -e "${BLUE}[3/6] 启动内置本地模型...${NC}"
@@ -222,42 +200,33 @@ if [ -x "$LLM_BIN" ] && [ -f "$LLM_MODEL" ]; then
   fi
 else
   echo -e "${YELLOW}⚠️  内置模型未找到，跳过 (仍可使用云端 API)${NC}"
+  echo -e "${YELLOW}   模型路径: $LLM_MODEL${NC}"
+  echo -e "${YELLOW}   二进制路径: $LLM_BIN${NC}"
 fi
 
 # ============================================
-# 4. 保存上次使用的路径
+# 4/6 初始化工作目录
 # ============================================
 echo ""
-echo -e "${BLUE}[4/6] 保存路径记录...${NC}"
-
-mkdir -p "$DATA_DIR"
-echo "$USB_PATH" > "$DATA_DIR/.last_usb"
-echo -e "${GREEN}✅ 路径已保存到: $DATA_DIR/.last_usb${NC}"
-
-# ============================================
-# 5. 初始化工作目录
-# ============================================
-echo ""
-echo -e "${BLUE}[4/5] 初始化工作目录...${NC}"
+echo -e "${BLUE}[4/6] 初始化工作目录...${NC}"
 
 mkdir -p "$CONFIG_DIR"
 mkdir -p "$WORKSPACE_DIR"
 mkdir -p "$DATA_DIR"
 mkdir -p "$TEMP_DIR"
+mkdir -p "$LLM_DIR"
 
 # 从 U盘加载配置到本地
 if [ -d "$DATA_DIR/.openclaw" ]; then
-    # 使用 rsync 进行增量同步（如果可用）
-    if command -v rsync &> /dev/null; then
-        rsync -av --update "$DATA_DIR/.openclaw/" "$TEMP_DIR/" 2>/dev/null || true
-    else
-        cp -r "$DATA_DIR/.openclaw/"* "$TEMP_DIR/" 2>/dev/null || true
-        echo -e "${YELLOW}⚠️  rsync 不可用，使用基础复制模式${NC}"
-    fi
-    echo -e "${GREEN}✅ 配置已从 U盘加载${NC}"
+  if command -v rsync &> /dev/null; then
+    rsync -av --update "$DATA_DIR/.openclaw/" "$TEMP_DIR/" 2>/dev/null || true
+  else
+    cp -r "$DATA_DIR/.openclaw/"* "$TEMP_DIR/" 2>/dev/null || true
+  fi
+  echo -e "${GREEN}✅ 配置已从 U盘加载${NC}"
 else
-    mkdir -p "$TEMP_DIR"
-    cat > "$TEMP_DIR/openclaw.json" << 'EOF'
+  mkdir -p "$TEMP_DIR"
+  cat > "$TEMP_DIR/openclaw.json" << 'EOF'
 {
   "gateway": {
     "port": 18789,
@@ -265,28 +234,96 @@ else
   }
 }
 EOF
-    echo -e "${GREEN}✅ 默认配置已创建${NC}"
+  echo -e "${GREEN}✅ 默认配置已创建${NC}"
 fi
 
-# 设置配置文件权限（仅所有者可读写，保护敏感信息）
+# 设置配置文件权限
 if [ -f "$TEMP_DIR/openclaw.json" ]; then
     chmod 600 "$TEMP_DIR/openclaw.json"
 fi
 
 # ============================================
-# 6. 启动 OpenClaw
+# [NEW] 自动注入内置模型配置
+# ============================================
+if [ $LLM_BUNDLED_READY -eq 1 ]; then
+  echo ""
+  echo -e "${BLUE}[4.5/6] 配置内置模型...${NC}"
+  
+  # 检查用户是否已配置主模型
+  HAS_PRIMARY=$("$NODE_DIR/bin/node" -e "
+    try {
+      const cfg = JSON.parse(require('fs').readFileSync('$TEMP_DIR/openclaw.json','utf8'));
+      console.log(cfg?.agents?.defaults?.model?.primary ? 'yes' : 'no');
+    } catch(e) { console.log('no'); }
+  " 2>/dev/null || echo "no")
+  
+  # 注入内置模型配置
+  "$NODE_DIR/bin/node" -e "
+    const fs = require('fs');
+    const cfgPath = '$TEMP_DIR/openclaw.json';
+    const cfg = fs.existsSync(cfgPath) ? JSON.parse(fs.readFileSync(cfgPath,'utf8')) : {};
+    
+    // 添加内置模型提供者
+    cfg.models = cfg.models || {};
+    cfg.models.providers = cfg.models.providers || {};
+    cfg.models.providers['bundled-local'] = {
+      baseUrl: 'http://127.0.0.1:18080/v1',
+      apiKey: 'bundled-no-key',
+      api: 'openai-completions',
+      models: [
+        {
+          id: 'qwen2.5-1.5b',
+          name: 'Qwen2.5 1.5B (Bundled CPU)',
+          contextWindow: 32768,
+          maxTokens: 4096,
+          cost: { input: 0, output: 0 }
+        }
+      ]
+    };
+    
+    // 设置为默认模型（仅在用户未配置时）
+    cfg.agents = cfg.agents || {};
+    cfg.agents.defaults = cfg.agents.defaults || {};
+    cfg.agents.defaults.model = cfg.agents.defaults.model || {};
+    
+    if ('$HAS_PRIMARY' === 'no') {
+      cfg.agents.defaults.model.primary = 'bundled-local/qwen2.5-1.5b';
+      console.log('default');
+    } else {
+      console.log('fallback');
+    }
+    
+    fs.writeFileSync(cfgPath, JSON.stringify(cfg, null, 2));
+  " 2>/dev/null
+  
+  if [ "$HAS_PRIMARY" = "no" ]; then
+    echo -e "${GREEN}   ✅ bundled-local/qwen2.5-1.5b 已设为默认模型${NC}"
+  else
+    echo -e "${CYAN}   ℹ️  检测到已配置主模型，内置模型作为备用${NC}"
+  fi
+fi
+
+# ============================================
+# 5/6 保存路径记录
 # ============================================
 echo ""
-echo -e "${BLUE}[5/5] 启动 OpenClaw Gateway...${NC}"
+echo -e "${BLUE}[5/6] 保存路径记录...${NC}"
 
-# ✅ Fix 2: 使用专属环境变量，不修改 HOME
+echo "$USB_PATH" > "$DATA_DIR/.last_usb"
+echo -e "${GREEN}✅ 路径已保存到: $DATA_DIR/.last_usb${NC}"
+
+# ============================================
+# 6/6 启动 OpenClaw Gateway
+# ============================================
+echo ""
+echo -e "${BLUE}[6/6] 启动 OpenClaw Gateway...${NC}"
+
+# 设置环境变量
 export OPENCLAW_WORKSPACE="$WORKSPACE_DIR"
 export OPENCLAW_CONFIG_DIR="$TEMP_DIR"
 export XDG_CONFIG_HOME="$TEMP_DIR/.config"
 export XDG_DATA_HOME="$TEMP_DIR/.local/share"
-# ❌ 删除这行: export HOME="$TEMP_DIR"
 
-# 验证启动（使用正确的端口）
 GATEWAY_PORT=${GATEWAY_PORT:-18789}
 
 # 检查是否已在运行
@@ -326,7 +363,6 @@ if [ $HEALTH_CHECK_OK -eq 1 ]; then
     GATEWAY_TOKEN=""
     
     if [ -f "$CONFIG_FILE" ]; then
-        # 使用 grep 和 sed 提取 token
         GATEWAY_TOKEN=$(grep -o '"token"[[:space:]]*:[[:space:]]*"[^"]*"' "$CONFIG_FILE" 2>/dev/null | sed 's/.*"token"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' || true)
     fi
     
@@ -367,6 +403,15 @@ if [ $HEALTH_CHECK_OK -eq 1 ]; then
         elif command -v open &>/dev/null; then
             open "http://localhost:$GATEWAY_PORT" 2>/dev/null &
         fi
+    fi
+    
+    echo ""
+    
+    # 显示模型状态
+    if [ $LLM_BUNDLED_READY -eq 1 ]; then
+        echo -e "  ${GREEN}🤖 内置模型: qwen2.5-1.5b (端口 $LLM_PORT)${NC}"
+    else
+        echo -e "  ${YELLOW}☁️  使用云端 API 模型${NC}"
     fi
     
     echo ""
