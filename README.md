@@ -6,6 +6,21 @@
 
 ---
 
+## 🎉 What's New in v6.0
+
+### **Built-in Local Model Support** 🤖
+
+OpenClaw Portable now includes a **CPU-only local AI model** (Qwen2.5-1.5B) that runs entirely offline:
+
+- ✅ **Zero API costs** - No external API needed
+- ✅ **Complete offline** - Works without internet
+- ✅ **Zero configuration** - Auto-detected and registered
+- ✅ **Graceful degradation** - Cloud APIs still available as fallback
+
+See [BUNDLED_MODEL.md](BUNDLED_MODEL.md) for details.
+
+---
+
 ## 🎯 The Problem We Solve
 
 **Traditional AI assistants require:**
