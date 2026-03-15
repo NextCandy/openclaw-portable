@@ -59,3 +59,14 @@ yarn-error.log*
 .task-card.md
 .review.md
 dist/
+
+# llama.cpp binaries and models (distributed separately)
+llm/bin/
+llm/models/*.gguf
+llm/server.log
+llm/server.pid
+
+# Build outputs
+dist/
+*.tar.gz
+*.zip
