@@ -1,10 +1,10 @@
 @echo off
 setlocal enabledelayedexpansion
-title OpenClaw Portable v5.0.2
+title OpenClaw Portable v5.0.3
 
 echo.
 echo ==========================================
-echo   OpenClaw Portable v5.0.2 - Offline Edition
+echo   OpenClaw Portable v5.0.3 - Offline Edition
 echo ==========================================
 echo.
 
@@ -115,38 +115,104 @@ rem ============================================
 echo.
 echo [5/5] Starting OpenClaw Gateway...
 echo.
-echo   ==========================================
+
+rem Start OpenClaw Gateway (background)
+start /b "" "%NODE_EXE%" "%OPENCLAW_ENTRY%" gateway run --port %GATEWAY_PORT% --allow-unconfigured
+
+rem Wait for startup (max 10 seconds)
+echo [INFO] Waiting for Gateway to start...
+set WAIT_COUNT=0
+:wait_loop
+timeout /t 1 /nobreak >nul
+set /a WAIT_COUNT+=1
+
+rem Check if port is listening
+netstat -aon 2>nul | findstr ":%GATEWAY_PORT%" | findstr "LISTENING" >nul
+if not errorlevel 1 (
+    echo [OK]  Gateway is running on port %GATEWAY_PORT%
+    goto :gateway_started
+)
+
+rem Timeout after 10 seconds
+if %WAIT_COUNT% LSS 10 goto :wait_loop
+
+echo [ERROR] Gateway failed to start within 10 seconds
+pause
+exit /b 1
+
+:gateway_started
+echo.
+
+rem ============================================
+rem Extract and display token
+rem ============================================
+set "CONFIG_FILE=%OPENCLAW_HOME%\.openclaw\openclaw.json"
+set GATEWAY_TOKEN=
+
+rem Wait for config file to be created (max 5 seconds)
+set WAIT_COUNT=0
+:wait_config
+if exist "%CONFIG_FILE%" goto :read_token
+timeout /t 1 /nobreak >nul
+set /a WAIT_COUNT+=1
+if %WAIT_COUNT% LSS 5 goto :wait_config
+echo [WARN] Config file not found, token extraction skipped
+goto :show_url
+
+:read_token
+rem Extract token from JSON using findstr
+for /f "tokens=2 delims=:" %%a in ('findstr /C:"\"token\"" "%CONFIG_FILE%" 2^>nul') do (
+    set "TOKEN_LINE=%%a"
+    rem Remove quotes and commas
+    set "TOKEN_LINE=!TOKEN_LINE:"=!"
+    set "TOKEN_LINE=!TOKEN_LINE:,=!"
+    set "TOKEN_LINE=!TOKEN_LINE: =!"
+    set "GATEWAY_TOKEN=!TOKEN_LINE!"
+)
+
+:show_url
+echo ==========================================
+echo   Gateway is ready!
+echo ==========================================
+echo.
 echo   Access URL: http://localhost:%GATEWAY_PORT%
-echo   ==========================================
 echo.
-echo   Instructions:
-echo   1. Wait for Gateway to start
-echo   2. Browser will open automatically
-echo   3. If prompted for token, check console output
-echo      or open: %OPENCLAW_HOME%\.openclaw\openclaw.json
+
+if defined GATEWAY_TOKEN (
+    echo   Token: !GATEWAY_TOKEN!
+    echo.
+    
+    rem Copy token to clipboard (Windows Vista+)
+    echo !GATEWAY_TOKEN! | clip >nul 2>&1
+    if not errorlevel 1 (
+        echo   [OK] Token copied to clipboard
+    ) else (
+        echo   [INFO] Copy token manually if needed
+    )
+    
+    echo.
+    echo   Direct link (with token):
+    echo   http://localhost:%GATEWAY_PORT%?token=!GATEWAY_TOKEN!
+    echo.
+    
+    rem Auto-open browser with token
+    start http://localhost:%GATEWAY_PORT%?token=!GATEWAY_TOKEN!
+) else (
+    echo   [INFO] Token not found in config file
+    echo   You can find it in: %CONFIG_FILE%
+    echo.
+    
+    rem Auto-open browser without token
+    start http://localhost:%GATEWAY_PORT%
+)
+
 echo.
-echo   To stop: Run stop.bat or close this window
-echo.
+echo ==========================================
+echo   To stop: Close this window or press Ctrl+C
 echo ==========================================
 echo.
 
-rem Auto-open browser after 8 seconds
-start "" cmd /c "timeout /t 8 /nobreak >nul && start http://localhost:%GATEWAY_PORT%"
-
-rem Start OpenClaw Gateway (foreground)
-"%NODE_EXE%" "%OPENCLAW_ENTRY%" gateway run --port %GATEWAY_PORT% --allow-unconfigured
-
-rem === Exit handling ===
-echo.
-if errorlevel 1 (
-    echo [ERROR] OpenClaw exited with an error
-    echo.
-    echo Common causes:
-    echo   1. Port %GATEWAY_PORT% is in use
-    echo   2. Antivirus blocking - add to whitelist
-    echo.
-) else (
-    echo [INFO] OpenClaw stopped normally
-)
-echo.
-pause
+rem Keep the window open and show logs
+:keep_running
+timeout /t 60 /nobreak >nul
+goto :keep_running

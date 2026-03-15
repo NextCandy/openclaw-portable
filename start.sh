@@ -1,5 +1,5 @@
 #!/bin/bash
-# OpenClaw Portable - 智能启动脚本（修复版 v5.0.2）
+# OpenClaw Portable - 智能启动脚本（修复版 v5.0.3）
 # 使用方法：./start.sh
 
 # ✅ Fix 1: 立即定义 SCRIPT_DIR
@@ -17,7 +17,7 @@ CYAN='\033[0;36m'
 NC='\033[0m'
 
 echo -e "${GREEN}╔════════════════════════════════════════╗${NC}"
-echo -e "${GREEN}║    OpenClaw Portable v5.0.2            ║${NC}"
+echo -e "${GREEN}║    OpenClaw Portable v5.0.3            ║${NC}"
 echo -e "${GREEN}║        Smart Launcher (Fixed)          ║${NC}"
 echo -e "${GREEN}╚════════════════════════════════════════╝${NC}"
 echo ""
@@ -261,7 +261,56 @@ if [ $HEALTH_CHECK_OK -eq 1 ]; then
     echo -e "${GREEN}║          ✅ 启动成功！                 ║${NC}"
     echo -e "${GREEN}╚════════════════════════════════════════╝${NC}"
     echo ""
+    
+    # 提取 token
+    CONFIG_FILE="$TEMP_DIR/openclaw.json"
+    GATEWAY_TOKEN=""
+    
+    if [ -f "$CONFIG_FILE" ]; then
+        # 使用 grep 和 sed 提取 token
+        GATEWAY_TOKEN=$(grep -o '"token"[[:space:]]*:[[:space:]]*"[^"]*"' "$CONFIG_FILE" 2>/dev/null | sed 's/.*"token"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' || true)
+    fi
+    
     echo -e "  ${BLUE}访问地址:${NC} http://localhost:$GATEWAY_PORT"
+    
+    if [ -n "$GATEWAY_TOKEN" ]; then
+        echo -e "  ${BLUE}Token:${NC}      $GATEWAY_TOKEN"
+        echo ""
+        
+        # 尝试复制到剪贴板
+        if command -v xclip &>/dev/null; then
+            echo "$GATEWAY_TOKEN" | xclip -selection clipboard 2>/dev/null && \
+                echo -e "  ${GREEN}✅ Token 已复制到剪贴板${NC}"
+        elif command -v xsel &>/dev/null; then
+            echo "$GATEWAY_TOKEN" | xsel --clipboard --input 2>/dev/null && \
+                echo -e "  ${GREEN}✅ Token 已复制到剪贴板${NC}"
+        elif command -v pbcopy &>/dev/null; then
+            echo "$GATEWAY_TOKEN" | pbcopy 2>/dev/null && \
+                echo -e "  ${GREEN}✅ Token 已复制到剪贴板${NC}"
+        fi
+        
+        echo ""
+        echo -e "  ${CYAN}直接访问链接（含 Token）:${NC}"
+        echo -e "  ${CYAN}http://localhost:$GATEWAY_PORT?token=$GATEWAY_TOKEN${NC}"
+        
+        # 自动打开浏览器（带 token）
+        if command -v xdg-open &>/dev/null; then
+            xdg-open "http://localhost:$GATEWAY_PORT?token=$GATEWAY_TOKEN" 2>/dev/null &
+        elif command -v open &>/dev/null; then
+            open "http://localhost:$GATEWAY_PORT?token=$GATEWAY_TOKEN" 2>/dev/null &
+        fi
+    else
+        echo -e "  ${YELLOW}Token 未找到，可在此查看: $CONFIG_FILE${NC}"
+        
+        # 自动打开浏览器（不带 token）
+        if command -v xdg-open &>/dev/null; then
+            xdg-open "http://localhost:$GATEWAY_PORT" 2>/dev/null &
+        elif command -v open &>/dev/null; then
+            open "http://localhost:$GATEWAY_PORT" 2>/dev/null &
+        fi
+    fi
+    
+    echo ""
     echo -e "  ${BLUE}U盘路径:${NC}   $(dirname $USB_PATH)"
     echo ""
     echo -e "  ${GREEN}运行环境离线，AI 服务需要网络连接${NC}"

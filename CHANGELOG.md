@@ -5,6 +5,35 @@ All notable changes to OpenClaw Portable will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.3] - 2026-03-15
+
+### ✨ 新功能
+- **自动提取和显示 Token** - 启动后自动从配置文件提取 gateway token
+- **Token 自动复制到剪贴板** - Windows/Linux/macOS 自动复制，方便粘贴
+- **浏览器自动带 Token 打开** - URL 包含 token 参数，无需手动输入
+- **改进的用户体验** - 小白用户无需手动查找 token 文件
+
+### 🔧 改进
+- **start.bat** - 后台启动 + token 提取 + 自动打开浏览器（带 token）
+- **start-online.bat** - 后台启动 + token 提取 + 自动打开浏览器（带 token）
+- **start.sh** - token 提取 + 剪贴板复制 + 自动打开浏览器（带 token）
+
+### 📝 实现细节
+
+#### Windows
+```batch
+# 从 openclaw.json 提取 token
+# 复制到剪贴板（clip 命令）
+# 浏览器打开: http://localhost:18789?token=xxx
+```
+
+#### Linux/macOS
+```bash
+# 从 openclaw.json 提取 token
+# 复制到剪贴板（xclip/xsel/pbcopy）
+# 浏览器打开: http://localhost:18789?token=xxx
+```
+
 ## [5.0.2] - 2026-03-15
 
 ### 🐛 Bug 修复
