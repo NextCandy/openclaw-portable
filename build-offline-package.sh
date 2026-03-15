@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# OpenClaw Portable v5.0 - 离线包构建脚本
+# OpenClaw Portable v5.0.2 - 离线包构建脚本
 # 用途：下载 Node.js + OpenClaw，打包成完全离线的 Release 包
 
 set -euo pipefail
@@ -7,12 +7,12 @@ set -euo pipefail
 # 配置
 NODE_VERSION="22.16.0"
 OPENCLAW_VERSION="latest"
-OUTDIR="dist/OpenClaw-Portable-v5.0.0-windows"
+OUTDIR="dist/OpenClaw-Portable-v5.0.2-windows"
 MIRROR_NODE="https://npmmirror.com/mirrors/node"
 MIRROR_NPM="https://registry.npmmirror.com"
 
 echo "=========================================="
-echo "  OpenClaw Portable v5.0 - 离线包构建"
+echo "  OpenClaw Portable v5.0.2 - 离线包构建"
 echo "=========================================="
 echo ""
 
@@ -52,14 +52,14 @@ echo "   ✓ 脚本已复制"
 # 打包
 echo "[5/5] 打包 Release..."
 cd dist
-zip -r "OpenClaw-Portable-v5.0.0-windows-offline.zip" OpenClaw-Portable-v5.0.0-windows/
-SIZE=$(du -h "OpenClaw-Portable-v5.0.0-windows-offline.zip" | cut -f1)
+zip -r "OpenClaw-Portable-v5.0.2-windows-offline.zip" OpenClaw-Portable-v5.0.2-windows/
+SIZE=$(du -h "OpenClaw-Portable-v5.0.2-windows-offline.zip" | cut -f1)
 
 echo ""
 echo "=========================================="
 echo "  ✅ 构建完成！"
 echo "=========================================="
-echo "  文件: OpenClaw-Portable-v5.0.0-windows-offline.zip"
+echo "  文件: OpenClaw-Portable-v5.0.2-windows-offline.zip"
 echo "  大小: ${SIZE}"
 echo "  位置: dist/"
 echo ""

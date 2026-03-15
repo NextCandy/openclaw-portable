@@ -1,10 +1,10 @@
 @echo off
 setlocal enabledelayedexpansion
-title OpenClaw Portable v5.0 (Online)
+title OpenClaw Portable v5.0.2 (Online)
 
 echo.
 echo ==========================================
-echo   OpenClaw Portable v5.0 - Online Edition
+echo   OpenClaw Portable v5.0.2 - Online Edition
 echo   First run requires internet (~60MB)
 echo ==========================================
 echo.

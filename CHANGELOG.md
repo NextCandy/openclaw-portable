@@ -5,6 +5,44 @@ All notable changes to OpenClaw Portable will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.2] - 2026-03-15
+
+### 🐛 Bug 修复
+- **[PR #50]** 修复启动脚本端口传递问题
+  - start.bat 添加 `--port %GATEWAY_PORT%` 参数
+  - start-basic.bat 修正硬编码端口 3000 → 18789
+  - start.sh 添加 `--port $GATEWAY_PORT` 参数
+  - start-online.bat 添加 `--port %GATEWAY_PORT%` 参数
+  - stop.sh 添加 `export OPENCLAW_CONFIG_DIR` 环境变量
+  - start.sh 改进健康检查逻辑（检查 curl/wget 命令存在性）
+
+### 🔧 改进
+- **健康检查更健壮** - 先检查 curl/wget 是否存在，再执行健康检查
+- **配置目录正确性** - stop.sh 设置配置目录环境变量，确保能找到运行实例
+- **版本号统一** - 所有脚本版本号统一为 v5.0.2
+
+### 📝 文档
+- **更新 .gitignore** - 添加 .task-card.md 和 .review.md（开发过程文件）
+
+## [5.0.1] - 2026-03-15
+
+### 🐛 Bug 修复
+- **[PR #49]** 修复 apply-config.bat 无法找到 Node.js 的问题
+
+### ✨ 新功能
+- **[PR #48]** 智能配置合并 v5.1
+  - 配置优先级：用户配置 > 默认配置
+  - 支持增量配置更新
+  - 配置验证和错误提示
+
+## [5.0.0] - 2026-03-14
+
+### ✨ 重大更新
+- **完全离线运行** - Node.js + OpenClaw 预打包，无需网络
+- **多平台支持** - Windows (.bat) + Linux/macOS (.sh)
+- **智能检测** - 自动检测 U盘路径和挂载点
+- **配置持久化** - 数据自动同步到 U盘
+
 ## [4.1.0] - 2026-03-14
 
 ### 🔒 安全加固
