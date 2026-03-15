@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>OpenClaw 配置</title>
+    <title>OpenClaw 模型配置</title>
     <style>
         body{font-family:system-ui;max-width:600px;margin:40px auto;padding:20px;background:#f5f5f5}
         .card{background:white;border-radius:12px;padding:30px;box-shadow:0 2px 10px rgba(0,0,0,.1)}
@@ -14,15 +14,24 @@
         .btn{width:100%;padding:12px;border:none;border-radius:8px;font-size:16px;cursor:pointer;margin-top:10px}
         .btn-primary{background:#667eea;color:white}
         .btn-primary:hover{background:#5a67d8}
+        .btn-secondary{background:#48bb78;color:white;margin-top:15px}
+        .btn-secondary:hover{background:#38a169}
         .msg{padding:12px;border-radius:8px;margin-top:15px;display:none}
         .msg.ok{background:#d1fae5;color:#065f46;display:block}
         .msg.err{background:#fee2e2;color:#991b1b;display:block}
         code{background:#f0f0f0;padding:2px 6px;border-radius:4px;font-size:12px}
+        .warning{background:#fef3c7;border-left:4px solid #f59e0b;padding:12px;margin:15px 0;border-radius:4px}
+        .warning-title{font-weight:600;color:#92400e;margin-bottom:5px}
     </style>
 </head>
 <body>
 <div class="card">
-    <h1>🦞 OpenClaw 配置</h1>
+    <h1>🦞 OpenClaw 模型配置</h1>
+    
+    <div class="warning">
+        <div class="warning-title">⚠️ 注意</div>
+        此工具只会更新 <strong>模型配置</strong>，不会覆盖其他设置（如 MCP、定时任务等）
+    </div>
     
     <div class="group">
         <label>模型厂商</label>
@@ -52,6 +61,7 @@
     </div>
     
     <button class="btn btn-primary" onclick="saveConfig()">💾 生成配置文件</button>
+    <button class="btn btn-secondary" onclick="showHelp()">❓ 使用说明</button>
     
     <div id="msg" class="msg"></div>
 </div>
@@ -79,40 +89,55 @@ function saveConfig() {
     const apiKey = document.getElementById('apiKey').value;
     
     if (!model || !apiUrl || !apiKey) {
-        showMsg('请填写所有字段', false);
+        showMsg('❌ 请填写所有字段', false);
         return;
     }
     
-    const config = {
-        gateway: {mode: "local"},
-        agents: {
-            defaults: {
-                modelConfig: {api: "openai-chat", baseUrl: apiUrl, model: model}
-            },
+    // 只生成 models 配置（增量配置）
+    const modelsConfig = {
+        models: {
             providers: {
                 [provider]: {
                     api: "openai-chat",
                     baseUrl: apiUrl,
                     models: [{name: model, apiKey: apiKey}]
                 }
+            },
+            defaults: {
+                model: model
             }
         }
     };
     
-    // 下载文件
-    const blob = new Blob([JSON.stringify(config, null, 2)], {type: 'application/json'});
+    // 下载 models.json
+    const blob = new Blob([JSON.stringify(modelsConfig, null, 2)], {type: 'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'openclaw.json';
+    a.download = 'models.json';
     a.click();
     
     showMsg(`✅ 配置文件已下载！
 
-下一步：
-1. 将下载的 openclaw.json 复制到 data\\.openclaw\\ 目录
-2. 运行 restart.bat 重启 Gateway
+<strong>下一步：</strong>
+1. 将下载的 <code>models.json</code> 复制到 OpenClaw Portable 根目录
+2. 双击 <code>apply-config.bat</code> 应用配置
+3. 运行 <code>restart.bat</code> 重启 Gateway
 
-配置位置：<code>data\\.openclaw\\openclaw.json</code>`, true);
+💡 <strong>智能合并</strong>：只会更新模型配置，不会覆盖其他设置`, true);
+}
+
+function showHelp() {
+    alert(`使用说明：
+
+1. 填写模型信息并点击"生成配置文件"
+2. 下载 models.json 并复制到 OpenClaw Portable 根目录
+3. 双击 apply-config.bat 应用配置
+4. 运行 restart.bat 重启 Gateway
+
+特点：
+✅ 只更新模型配置
+✅ 保留其他所有设置
+✅ 自动备份原配置`);
 }
 
 function showMsg(text, ok) {

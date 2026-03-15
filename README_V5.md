@@ -101,66 +101,67 @@ OpenClaw-Portable-v5.0/
 
 ## 🎨 可视化配置面板
 
-### 快速配置模型
+### 快速配置模型（智能合并）
 
 1. **打开配置面板**
-   - 双击 `open-config.bat`
-   - 或用浏览器打开 `config-ui/index.html`
+   - 双击 `config.bat`
+   - 或用浏览器打开 `config.html`
 
 2. **选择模型厂商**
-   - OpenAI (GPT-4, GPT-3.5)
+   - OpenAI (GPT-4o)
    - Anthropic (Claude)
    - Google (Gemini)
    - 智谱 AI (GLM)
    - DeepSeek
-   - Moonshot (Kimi)
    - 自定义
 
 3. **填写配置**
    - 模型名称 (如: gpt-4o, claude-3-5-sonnet)
-   - API 类型 (通常自动选择)
    - API 地址 (通常自动填充)
    - API Key
 
-4. **保存并重启**
-   - 点击"保存并重启 Gateway"
-   - 将下载的 `openclaw.json` 复制到 `data\.openclaw\`
-   - 或直接运行 `restart.bat`
+4. **生成并应用配置**
+   - 点击 "💾 生成配置文件"
+   - 将下载的 `models.json` 复制到 OpenClaw Portable 根目录
+   - 双击 `apply-config.bat` 应用配置
+   - 运行 `restart.bat` 重启 Gateway
+
+### ⚡ 智能合并特性
+
+- ✅ **只更新模型配置** - 不会覆盖其他设置
+- ✅ **自动备份** - 应用前自动备份原配置
+- ✅ **安全可靠** - 显示将要合并的字段
 
 ### 配置文件位置
 
 ```
-data/
-└── .openclaw/
-    └── openclaw.json
+OpenClaw-Portable/
+├── config.html           # 配置面板
+├── apply-config.bat      # 应用配置脚本
+├── install-models.js     # 合并逻辑
+├── models.json           # 临时配置文件（应用后自动删除）
+└── data/
+    └── .openclaw/
+        ├── openclaw.json     # 主配置文件
+        └── openclaw.json.bak # 自动备份
 ```
 
 ### 手动配置示例
 
+如果需要手动编辑，可以参考以下结构：
+
 ```json
 {
-  "gateway": {
-    "mode": "local"
-  },
-  "agents": {
-    "defaults": {
-      "modelConfig": {
-        "api": "openai-chat",
-        "baseUrl": "https://api.openai.com/v1",
-        "model": "gpt-4o"
-      }
-    },
+  "models": {
     "providers": {
       "openai": {
         "api": "openai-chat",
         "baseUrl": "https://api.openai.com/v1",
-        "models": [
-          {
-            "name": "gpt-4o",
-            "apiKey": "sk-your-api-key-here"
-          }
-        ]
+        "models": [{"name": "gpt-4o", "apiKey": "sk-..."}]
       }
+    },
+    "defaults": {
+      "model": "gpt-4o"
     }
   }
 }
