@@ -1,10 +1,10 @@
 @echo off
 setlocal enabledelayedexpansion
-title OpenClaw Portable v5.0.4 (Online)
+title OpenClaw Portable v5.0.5 (Online)
 
 echo.
 echo ==========================================
-echo   OpenClaw Portable v5.0.4 - Online Edition
+echo   OpenClaw Portable v5.0.5 - Online Edition
 echo   First run requires internet (~60MB)
 echo ==========================================
 echo.
@@ -105,9 +105,18 @@ if not exist "%SCRIPT_DIR%\data" mkdir "%SCRIPT_DIR%\data"
 rem Start OpenClaw Gateway (background)
 start /b "" "%NODE_EXE%" "%OPENCLAW_ENTRY%" gateway run --port %GATEWAY_PORT%
 
-rem Wait for startup (max 10 seconds)
+rem ============================================
+rem Wait for Gateway to be ready (up to 60 seconds)
+rem ============================================
 echo [INFO] Waiting for Gateway to start...
+echo [INFO] This may take up to 60 seconds on first run...
+echo.
+
+set "CONFIG_FILE=%SCRIPT_DIR%\data\.openclaw\openclaw.json"
+set GATEWAY_TOKEN=
+set GATEWAY_READY=0
 set WAIT_COUNT=0
+
 :wait_loop
 timeout /t 1 /nobreak >nul
 set /a WAIT_COUNT+=1
@@ -115,48 +124,54 @@ set /a WAIT_COUNT+=1
 rem Check if port is listening
 netstat -aon 2>nul | findstr ":%GATEWAY_PORT%" | findstr "LISTENING" >nul
 if not errorlevel 1 (
-    echo [OK]  Gateway is running on port %GATEWAY_PORT%
-    goto :gateway_started
+    set GATEWAY_READY=1
 )
 
-rem Timeout after 10 seconds
-if %WAIT_COUNT% LSS 10 goto :wait_loop
+rem Try to extract token if config file exists
+if exist "%CONFIG_FILE%" (
+    if not defined GATEWAY_TOKEN (
+        for /f "tokens=2 delims=:" %%a in ('findstr /C:"\"token\"" "%CONFIG_FILE%" 2^>nul') do (
+            set "TOKEN_LINE=%%a"
+            set "TOKEN_LINE=!TOKEN_LINE:"=!"
+            set "TOKEN_LINE=!TOKEN_LINE:,=!"
+            set "TOKEN_LINE=!TOKEN_LINE: =!"
+            set "GATEWAY_TOKEN=!TOKEN_LINE!"
+        )
+    )
+)
 
-echo [ERROR] Gateway failed to start within 10 seconds
-pause
-exit /b 1
+rem Ready if both port is listening AND (token found OR waited 30+ seconds)
+if !GATEWAY_READY! EQU 1 (
+    if defined GATEWAY_TOKEN goto :gateway_ready
+    if !WAIT_COUNT! GEQ 30 goto :gateway_ready
+)
 
-:gateway_started
+rem Show progress every 5 seconds
+set /a MOD=!WAIT_COUNT! %% 5
+if !MOD! EQU 0 (
+    echo [INFO] Still waiting... (!WAIT_COUNT!/60 seconds^)
+)
+
+rem Timeout after 60 seconds
+if !WAIT_COUNT! LSS 60 goto :wait_loop
+
+echo.
+echo [WARN] Gateway startup timeout (60 seconds^)
+echo [INFO] Gateway may still be starting in the background
+echo.
+
+:gateway_ready
+echo.
+if !GATEWAY_READY! EQU 1 (
+    echo [OK]  Gateway is running on port %GATEWAY_PORT%
+) else (
+    echo [INFO] Gateway is still starting...
+)
 echo.
 
 rem ============================================
-rem Extract and display token
+rem Display access information
 rem ============================================
-set "CONFIG_FILE=%SCRIPT_DIR%\data\.openclaw\openclaw.json"
-set GATEWAY_TOKEN=
-
-rem Wait for config file to be created (max 5 seconds)
-set WAIT_COUNT=0
-:wait_config
-if exist "%CONFIG_FILE%" goto :read_token
-timeout /t 1 /nobreak >nul
-set /a WAIT_COUNT+=1
-if %WAIT_COUNT% LSS 5 goto :wait_config
-echo [WARN] Config file not found, token extraction skipped
-goto :show_url
-
-:read_token
-rem Extract token from JSON using findstr
-for /f "tokens=2 delims=:" %%a in ('findstr /C:"\"token\"" "%CONFIG_FILE%" 2^>nul') do (
-    set "TOKEN_LINE=%%a"
-    rem Remove quotes and commas
-    set "TOKEN_LINE=!TOKEN_LINE:"=!"
-    set "TOKEN_LINE=!TOKEN_LINE:,=!"
-    set "TOKEN_LINE=!TOKEN_LINE: =!"
-    set "GATEWAY_TOKEN=!TOKEN_LINE!"
-)
-
-:show_url
 echo ==========================================
 echo   Gateway is ready!
 echo ==========================================
@@ -184,12 +199,40 @@ if defined GATEWAY_TOKEN (
     rem Auto-open browser with token
     start http://localhost:%GATEWAY_PORT%?token=!GATEWAY_TOKEN!
 ) else (
-    echo   [INFO] Token not found in config file
-    echo   Config path: %CONFIG_FILE%
+    echo   [INFO] Token not found yet, will retry in 5 seconds...
     echo.
     
-    rem Auto-open browser without token
-    start http://localhost:%GATEWAY_PORT%
+    rem Wait a bit more for token
+    timeout /t 5 /nobreak >nul
+    
+    rem Retry token extraction
+    if exist "%CONFIG_FILE%" (
+        for /f "tokens=2 delims=:" %%a in ('findstr /C:"\"token\"" "%CONFIG_FILE%" 2^>nul') do (
+            set "TOKEN_LINE=%%a"
+            set "TOKEN_LINE=!TOKEN_LINE:"=!"
+            set "TOKEN_LINE=!TOKEN_LINE:,=!"
+            set "TOKEN_LINE=!TOKEN_LINE: =!"
+            set "GATEWAY_TOKEN=!TOKEN_LINE!"
+        )
+    )
+    
+    if defined GATEWAY_TOKEN (
+        echo   Token: !GATEWAY_TOKEN!
+        echo.
+        powershell -NoProfile -Command "Set-Clipboard -Value '!GATEWAY_TOKEN!'" 2>nul
+        echo   [OK] Token copied to clipboard
+        echo.
+        echo   Direct link with token:
+        echo   http://localhost:%GATEWAY_PORT%?token=!GATEWAY_TOKEN!
+        echo.
+        start http://localhost:%GATEWAY_PORT%?token=!GATEWAY_TOKEN!
+    ) else (
+        echo   [WARN] Token still not found
+        echo   Config path: %CONFIG_FILE%
+        echo.
+        echo   Opening browser without token...
+        start http://localhost:%GATEWAY_PORT%
+    )
 )
 
 echo.
