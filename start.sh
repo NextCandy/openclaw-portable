@@ -166,10 +166,69 @@ else
 fi
 
 # ============================================
+# [NEW] 3/6 启动内置本地模型 (llama-server)
+# ============================================
+echo ""
+echo -e "${BLUE}[3/6] 启动内置本地模型...${NC}"
+
+LLM_DIR="$USB_PATH/llm"
+LLM_PORT=18080
+LLM_PID_FILE="$LLM_DIR/server.pid"
+LLM_LOG="$LLM_DIR/server.log"
+
+# 检测平台二进制
+OS_TYPE="$(uname -s)"
+ARCH_TYPE="$(uname -m)"
+
+case "$OS_TYPE" in
+  Linux*)  LLM_BIN="$LLM_DIR/bin/llama-server-linux-x86_64" ;;
+  Darwin*)
+    if [ "$ARCH_TYPE" = "arm64" ]; then
+      LLM_BIN="$LLM_DIR/bin/llama-server-macos-arm64"
+    else
+      LLM_BIN="$LLM_DIR/bin/llama-server-macos-x86_64"
+    fi ;;
+  *) LLM_BIN="" ;;
+esac
+
+LLM_MODEL="$LLM_DIR/models/qwen2.5-1.5b-instruct-q4_k_m.gguf"
+LLM_BUNDLED_READY=0
+
+if [ -x "$LLM_BIN" ] && [ -f "$LLM_MODEL" ]; then
+  # 检查端口是否已被占用
+  if ! lsof -i :$LLM_PORT -sTCP:LISTEN -t &>/dev/null 2>&1; then
+    # 计算线程数（总核心数 - 1，最小为 1）
+    THREADS=$(( $(nproc 2>/dev/null || sysctl -n hw.logicalcpu 2>/dev/null || echo 2) - 1 ))
+    THREADS=$(( THREADS < 1 ? 1 : THREADS ))
+    
+    chmod +x "$LLM_BIN"
+    nohup "$LLM_BIN" \
+      --model "$LLM_MODEL" \
+      --port $LLM_PORT \
+      --host 127.0.0.1 \
+      --ctx-size 32768 \
+      --threads $THREADS \
+      --parallel 1 \
+      -ngl 0 \
+      --log-disable \
+      >> "$LLM_LOG" 2>&1 &
+    echo $! > "$LLM_PID_FILE"
+    echo -e "${GREEN}✅ llama-server 已启动 (PID: $!, port: $LLM_PORT, threads: $THREADS)${NC}"
+    echo -e "${YELLOW}   模型加载中，首次响应约需 5-15 秒...${NC}"
+    LLM_BUNDLED_READY=1
+  else
+    echo -e "${GREEN}✅ 内置模型已在运行 (port: $LLM_PORT)${NC}"
+    LLM_BUNDLED_READY=1
+  fi
+else
+  echo -e "${YELLOW}⚠️  内置模型未找到，跳过 (仍可使用云端 API)${NC}"
+fi
+
+# ============================================
 # 4. 保存上次使用的路径
 # ============================================
 echo ""
-echo -e "${BLUE}[3/5] 保存路径记录...${NC}"
+echo -e "${BLUE}[4/6] 保存路径记录...${NC}"
 
 mkdir -p "$DATA_DIR"
 echo "$USB_PATH" > "$DATA_DIR/.last_usb"
