@@ -6,6 +6,31 @@
 
 ---
 
+## 📦 2つのバージョン
+
+ニーズに合ったバージョンをお選びください：
+
+| バージョン | サイズ | モデル | 推奨用途 |
+|-----------|--------|--------|----------|
+| **オフライン版** | ~1.2 GB | ✅ 内蔵 Qwen2.5-1.5B | 完全オフライン使用、設定不要 |
+| **オンライン版** | ~300 MB | ❌ なし（自分で追加） | 高速ダウンロード、クラウドAPI使用 |
+
+### オフライン版（推奨）
+- ✅ **完全オフライン動作** - ダウンロード後はネットワーク不要
+- ✅ **内蔵 Qwen2.5-1.5B モデル** - API費用ゼロ
+- ✅ **すぐに使える** - 解凍して実行
+- 📥 **ダウンロード**: `OpenClaw-Portable-v6.0.0-windows-offline.tar.gz`
+
+### オンライン版
+- ⚡ **サイズが小さい** - ダウンロード速度4倍
+- 🌐 **クラウドAPI使用** - DeepSeek、OpenAIなど
+- 🤖 **自分のモデルを追加** - カスタムモデル対応
+- 📥 **ダウンロード**: `OpenClaw-Portable-v6.0.0-windows-online.tar.gz`
+
+**推奨**: 完全オフライン使用が必要な場合は**オフライン版**を選択してください。安定したネットワークがある場合や特定のクラウドAPIを使用したい場合は**オンライン版**を選択してください。
+
+---
+
 ## 🎯 解決する問題
 
 **従来のAIアシスタントの課題：**
@@ -237,7 +262,17 @@ MIT ライセンス - [LICENSE](LICENSE) を参照
 
 このプロジェクトが役立ったら、⭐️ Star をお願いします！
 
+[![GitHub stars](https://img.shields.io/github/stars/SonicBotMan/openclaw-portable?style=for-the-badge&logo=github&color=yellow)](https://github.com/SonicBotMan/openclaw-portable/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/SonicBotMan/openclaw-portable?style=for-the-badge&logo=github&color=blue)](https://github.com/SonicBotMan/openclaw-portable/network/members)
+
+<details>
+<summary>📊 Star 履歴チャートを見る</summary>
+
 [![Star History Chart](https://api.star-history.com/svg?repos=SonicBotMan/openclaw-portable&type=Date)](https://star-history.com/#SonicBotMan/openclaw-portable&Date)
+
+<i>注：上記のチャートは GitHub の画像キャッシュにより、24〜48時間かかる場合があります。Star History Web サイトでリアルタイムデータをご覧ください。</i>
+
+</details>
 
 ---
 

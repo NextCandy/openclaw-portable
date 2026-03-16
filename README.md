@@ -6,6 +6,31 @@
 
 ---
 
+## 📦 Two Versions Available
+
+Choose the version that fits your needs:
+
+| Version | Size | Model | Best For |
+|---------|------|-------|----------|
+| **Offline** | ~1.2 GB | ✅ Built-in Qwen2.5-1.5B | Complete offline use, no setup |
+| **Online** | ~300 MB | ❌ None (add your own) | Fast download, use cloud APIs |
+
+### Offline Version (Recommended)
+- ✅ **Complete offline operation** - No network needed after download
+- ✅ **Built-in Qwen2.5-1.5B model** - Zero API costs
+- ✅ **Works out of the box** - Just extract and run
+- 📥 **Download**: `OpenClaw-Portable-v6.0.0-windows-offline.tar.gz`
+
+### Online Version
+- ⚡ **Smaller download** - 4x faster to download
+- 🌐 **Use cloud APIs** - DeepSeek, OpenAI, etc.
+- 🤖 **Add your own model** - Support for custom models
+- 📥 **Download**: `OpenClaw-Portable-v6.0.0-windows-online.tar.gz`
+
+**Recommendation**: Choose **Offline** version if you want complete offline operation. Choose **Online** version if you have stable internet or want to use specific cloud APIs.
+
+---
+
 ## 🎉 What's New in v6.0
 
 ### **Built-in Local Model Support** 🤖
@@ -252,7 +277,21 @@ MIT License - See [LICENSE](LICENSE)
 
 If this project helps you, please ⭐️ star it!
 
+<<<<<<< HEAD
 ![Star History Chart](https://api.star-history.com/svg?repos=SonicBotMan/openclaw-portable&type=Date)
+=======
+[![GitHub stars](https://img.shields.io/github/stars/SonicBotMan/openclaw-portable?style=for-the-badge&logo=github&color=yellow)](https://github.com/SonicBotMan/openclaw-portable/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/SonicBotMan/openclaw-portable?style=for-the-badge&logo=github&color=blue)](https://github.com/SonicBotMan/openclaw-portable/network/members)
+
+<details>
+<summary>📊 View Star History Chart</summary>
+
+[![Star History Chart](https://api.star-history.com/svg?repos=SonicBotMan/openclaw-portable&type=Date)](https://star-history.com/#SonicBotMan/openclaw-portable&Date)
+>>>>>>> 896d1b6 (fix: improve Star History display with real-time badges)
+
+<i>Note: The chart above may take 24-48 hours to update due to GitHub's image cache. Click to view real-time data on Star History website.</i>
+
+</details>
 
 ---
 
