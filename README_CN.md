@@ -252,7 +252,7 @@ MIT 许可证 - 详见 [LICENSE](LICENSE)
 
 如果这个项目对你有帮助，请 ⭐️ Star！
 
-[![Star History Chart](https://api.star-history.com/svg?repos=SonicBotMan/openclaw-portable&type=Date)](https://star-history.com/#SonicBotMan/openclaw-portable&Date)
+![Star History Chart](https://api.star-history.com/svg?repos=SonicBotMan/openclaw-portable&type=Date)
 
 ---
 
