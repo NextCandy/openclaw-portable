@@ -20,18 +20,18 @@ jobs:
     timeout-minutes: 90
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+        - name: Checkout code
+          uses: actions/checkout@v4
 
-      - name: Create directory structure
-        shell: bash
-        run: |
-          mkdir -p dist/OpenClaw-Portable-v6.0.0-windows-offline/{node,openclaw-pkg,llm/bin,llm/models,config,data,workspace,temp}
+        - name: Create directory structure
+          shell: bash
+          run: |
+            mkdir -p dist/OpenClaw-Portable-v6.0.0-windows-offline/{node,openclaw-pkg,llm/bin,llm/models,config,data,workspace,temp}
 
-      - name: Download model from GitHub Release
-        shell: bash
-        run: |
-          echo "=========================================="
+        - name: Download model from GitHub Release
+          shell: bash
+          run: |
+            echo "=========================================="
           echo "  Downloading Qwen2.5-1.5B Model (1066MB)"
           echo "=========================================="
 
@@ -61,10 +61,10 @@ jobs:
           ls -lh qwen2.5-1.5b-instruct-q4_k_m.gguf
           echo "✅ Model downloaded and merged"
 
-      - name: Download Node.js
-        shell: bash
-        run: |
-          echo "=========================================="
+        - name: Download Node.js
+          shell: bash
+          run: |
+            echo "=========================================="
           echo "  Downloading Node.js 22.16.0"
           echo "=========================================="
 
@@ -78,10 +78,10 @@ jobs:
 
           echo "✅ Node.js downloaded"
 
-      - name: Install OpenClaw
-        shell: bash
-        run: |
-          echo "=========================================="
+        - name: Install OpenClaw
+          shell: bash
+          run: |
+            echo "=========================================="
           echo "  Installing OpenClaw"
           echo "=========================================="
 
@@ -94,10 +94,10 @@ jobs:
 
           echo "✅ OpenClaw installed"
 
-      - name: Download llama.cpp
-        shell: bash
-        run: |
-          echo "=========================================="
+        - name: Download llama.cpp
+          shell: bash
+          run: |
+            echo "=========================================="
           echo "  Downloading llama.cpp"
           echo "=========================================="
 
@@ -115,10 +115,10 @@ jobs:
 
           echo "✅ llama.cpp downloaded"
 
-      - name: Copy scripts and config
-        shell: bash
-        run: |
-          echo "=========================================="
+        - name: Copy scripts and config
+          shell: bash
+          run: |
+            echo "=========================================="
           echo "  Copying scripts"
           echo "=========================================="
 
@@ -146,10 +146,10 @@ EOF
 
           echo "✅ Scripts copied"
 
-      - name: Create archive
-        shell: bash
-        run: |
-          echo "=========================================="
+        - name: Create archive
+          shell: bash
+          run: |
+            echo "=========================================="
           echo "  Creating offline archive"
           echo "=========================================="
 
@@ -161,18 +161,18 @@ EOF
           echo "✅ Offline archive created: $SIZE"
           ls -lh OpenClaw-Portable-v6.0.0-windows-offline.tar.gz
 
-      - name: Upload to Artifacts
-        uses: actions/upload-artifact@v4
-        with:
+        - name: Upload to Artifacts
+          uses: actions/upload-artifact@v4
+          with:
           name: openclaw-portable-v6.0.0-windows-offline
           path: dist/OpenClaw-Portable-v6.0.0-windows-offline.tar.gz
           retention-days: 90
           compression-level: 0
 
-      - name: Summary
-        shell: bash
-        run: |
-          echo "=========================================="
+        - name: Summary
+          shell: bash
+          run: |
+            echo "=========================================="
           echo "  ✅ Offline Build Complete!"
           echo "=========================================="
           echo "  Package: OpenClaw-Portable-v6.0.0-windows-offline.tar.gz"
@@ -186,18 +186,18 @@ EOF
     timeout-minutes: 30
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+        - name: Checkout code
+          uses: actions/checkout@v4
 
-      - name: Create directory structure
-        shell: bash
-        run: |
-          mkdir -p dist/OpenClaw-Portable-v6.0.0-windows-online/{node,openclaw-pkg,llm/bin,llm/models,config,data,workspace,temp}
+        - name: Create directory structure
+          shell: bash
+          run: |
+            mkdir -p dist/OpenClaw-Portable-v6.0.0-windows-online/{node,openclaw-pkg,llm/bin,llm/models,config,data,workspace,temp}
 
-      - name: Download Node.js
-        shell: bash
-        run: |
-          echo "=========================================="
+        - name: Download Node.js
+          shell: bash
+          run: |
+            echo "=========================================="
           echo "  Downloading Node.js 22.16.0"
           echo "=========================================="
 
@@ -211,10 +211,10 @@ EOF
 
           echo "✅ Node.js downloaded"
 
-      - name: Install OpenClaw
-        shell: bash
-        run: |
-          echo "=========================================="
+        - name: Install OpenClaw
+          shell: bash
+          run: |
+            echo "=========================================="
           echo "  Installing OpenClaw"
           echo "=========================================="
 
@@ -227,10 +227,10 @@ EOF
 
           echo "✅ OpenClaw installed"
 
-      - name: Download llama.cpp
-        shell: bash
-        run: |
-          echo "=========================================="
+        - name: Download llama.cpp
+          shell: bash
+          run: |
+            echo "=========================================="
           echo "  Downloading llama.cpp"
           echo "=========================================="
 
@@ -248,10 +248,10 @@ EOF
 
           echo "✅ llama.cpp downloaded"
 
-      - name: Copy scripts and config
-        shell: bash
-        run: |
-          echo "=========================================="
+        - name: Copy scripts and config
+          shell: bash
+          run: |
+            echo "=========================================="
           echo "  Copying scripts"
           echo "=========================================="
 
@@ -288,10 +288,10 @@ EOF
 
           echo "✅ Scripts copied"
 
-      - name: Create archive
-        shell: bash
-        run: |
-          echo "=========================================="
+        - name: Create archive
+          shell: bash
+          run: |
+            echo "=========================================="
           echo "  Creating online archive"
           echo "=========================================="
 
@@ -303,18 +303,18 @@ EOF
           echo "✅ Online archive created: $SIZE"
           ls -lh OpenClaw-Portable-v6.0.0-windows-online.tar.gz
 
-      - name: Upload to Artifacts
-        uses: actions/upload-artifact@v4
-        with:
+        - name: Upload to Artifacts
+          uses: actions/upload-artifact@v4
+          with:
           name: openclaw-portable-v6.0.0-windows-online
           path: dist/OpenClaw-Portable-v6.0.0-windows-online.tar.gz
           retention-days: 90
           compression-level: 0
 
-      - name: Summary
-        shell: bash
-        run: |
-          echo "=========================================="
+        - name: Summary
+          shell: bash
+          run: |
+            echo "=========================================="
           echo "  ✅ Online Build Complete!"
           echo "=========================================="
           echo "  Package: OpenClaw-Portable-v6.0.0-windows-online.tar.gz"
@@ -329,33 +329,33 @@ EOF
     if: github.event_name == 'release'
 
     steps:
-      - name: Download offline artifact
-        uses: actions/download-artifact@v4
-        with:
+        - name: Download offline artifact
+          uses: actions/download-artifact@v4
+          with:
           name: openclaw-portable-v6.0.0-windows-offline
           path: ./packages
 
-      - name: Download online artifact
-        uses: actions/download-artifact@v4
-        with:
+        - name: Download online artifact
+          uses: actions/download-artifact@v4
+          with:
           name: openclaw-portable-v6.0.0-windows-online
           path: ./packages
 
-      - name: List packages
-        run: |
-          echo "📦 Packages to upload:"
+        - name: List packages
+          run: |
+            echo "📦 Packages to upload:"
           ls -lh packages/
 
-      - name: Upload to Release
-        uses: softprops/action-gh-release@v1
-        with:
+        - name: Upload to Release
+          uses: softprops/action-gh-release@v1
+          with:
           files: packages/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Summary
-        run: |
-          echo "=========================================="
+        - name: Summary
+          run: |
+            echo "=========================================="
           echo "  ✅ Dual Release Complete!"
           echo "=========================================="
           echo ""
