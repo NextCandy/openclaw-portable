@@ -143,12 +143,43 @@ jobs:
       - name: List packages
         run: ls -lh packages/
 
-      - name: Upload to Release
+      - name: Upload to Release using curl
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd packages
+          
+          # Get upload URL from release
+          UPLOAD_URL=$(curl -s \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ github.event.release.tag_name }}" | \
+            jq -r '.upload_url' | sed 's/{?name,label}//')
+          
+          echo "Upload URL: $UPLOAD_URL"
+          echo ""
+          
+          # Upload each file
           for file in *.tar.gz; do
-            echo "Uploading $file..."
-            gh release upload ${{ github.event.release.tag_name }} "$file" --clobber || true
+            echo "📤 Uploading $file..."
+            
+            RESPONSE=$(curl -s -w "\n%{http_code}" \
+              -X POST \
+              -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Content-Type: application/gzip" \
+              --data-binary @"$file" \
+              "${UPLOAD_URL}?name=${file}")
+            
+            HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+            BODY=$(echo "$RESPONSE" | head -n -1)
+            
+            if [ "$HTTP_CODE" -eq 201 ]; then
+              echo "✅ $file uploaded successfully"
+            else
+              echo "❌ Failed to upload $file (HTTP $HTTP_CODE)"
+              echo "Response: $BODY"
+            fi
+            echo ""
           done
+          
+          echo "🎉 Upload complete!"
