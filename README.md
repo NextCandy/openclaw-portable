@@ -1,4 +1,4 @@
-# 🚀 OpenClaw Portable v6.0
+# 🚀 OpenClaw Portable
 
 ### The World's First Truly Offline AI Assistant - Zero Network Required
 
@@ -252,7 +252,7 @@ MIT License - See [LICENSE](LICENSE)
 
 If this project helps you, please ⭐️ star it!
 
-[![Star History Chart](https://api.star-history.com/svg?repos=SonicBotMan/openclaw-portable&type=Date)](https://star-history.com/#SonicBotMan/openclaw-portable&Date)
+![Star History Chart](https://api.star-history.com/svg?repos=SonicBotMan/openclaw-portable&type=Date)
 
 ---
 
