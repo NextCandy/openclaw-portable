@@ -144,8 +144,11 @@ jobs:
         run: ls -lh packages/
 
       - name: Upload to Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: packages/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd packages
+          for file in *.tar.gz; do
+            echo "Uploading $file..."
+            gh release upload ${{ github.event.release.tag_name }} "$file" --clobber || true
+          done
