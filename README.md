@@ -25,7 +25,7 @@ Choose the version that fits your needs:
 - ⚡ **Smaller download** - 4x faster to download
 - 🌐 **Use cloud APIs** - DeepSeek, OpenAI, etc.
 - 🤖 **Add your own model** - Support for custom models
-- 📥 **Download**: `OpenClaw-Portable-v6.0.0-windows-online.tar.gz`
+- 📥 **Download**: `[OpenClaw-Portable-v6.0.0-windows-online.tar.gz](https://github.com/SonicBotMan/openclaw-portable/releases/tag/v5.1.0)`
 
 **Recommendation**: Choose **Offline** version if you want complete offline operation. Choose **Online** version if you have stable internet or want to use specific cloud APIs.
 
