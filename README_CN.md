@@ -25,7 +25,7 @@
 - ⚡ **体积更小** - 下载速度快 4 倍
 - 🌐 **使用云端 API** - DeepSeek、OpenAI 等
 - 🤖 **添加自己的模型** - 支持自定义模型
-- 📥 **下载**: `OpenClaw-Portable-v6.0.0-windows-online.tar.gz`
+- 📥 **下载**: `[OpenClaw-Portable-v6.0.0-windows-online.tar.gz](https://github.com/SonicBotMan/openclaw-portable/releases/tag/v5.1.0)`
 
 **建议**: 如果需要完全离线使用，选择**离线版**。如果有稳定网络或想使用特定云端 API，选择**在线版**。
 
