@@ -25,7 +25,7 @@
 - ⚡ **体积更小** - 下载速度快 4 倍
 - 🌐 **使用云端 API** - DeepSeek、OpenAI 等
 - 🤖 **添加自己的模型** - 支持自定义模型
-- 📥 **下载**: `[OpenClaw-Portable-v6.0.0-windows-online.tar.gz](https://github.com/SonicBotMan/openclaw-portable/releases/tag/v5.1.0)`
+- 📥 **下载**: `[OpenClaw-Portable-v6.0.0-windows-online.tar.gz](https://github.com/SonicBotMan/openclaw-portable/releases/tag/v6.0.0)`
 
 **建议**: 如果需要完全离线使用，选择**离线版**。如果有稳定网络或想使用特定云端 API，选择**在线版**。
 
@@ -277,9 +277,6 @@ MIT 许可证 - 详见 [LICENSE](LICENSE)
 
 如果这个项目对你有帮助，请 ⭐️ Star！
 
-<<<<<<< HEAD
-![Star History Chart](https://api.star-history.com/svg?repos=SonicBotMan/openclaw-portable&type=Date)
-=======
 [![GitHub stars](https://img.shields.io/github/stars/SonicBotMan/openclaw-portable?style=for-the-badge&logo=github&color=yellow)](https://github.com/SonicBotMan/openclaw-portable/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/SonicBotMan/openclaw-portable?style=for-the-badge&logo=github&color=blue)](https://github.com/SonicBotMan/openclaw-portable/network/members)
 
@@ -287,7 +284,6 @@ MIT 许可证 - 详见 [LICENSE](LICENSE)
 <summary>📊 查看 Star 历史图表</summary>
 
 [![Star History Chart](https://api.star-history.com/svg?repos=SonicBotMan/openclaw-portable&type=Date)](https://star-history.com/#SonicBotMan/openclaw-portable&Date)
->>>>>>> 896d1b6 (fix: improve Star History display with real-time badges)
 
 <i>注意：由于 GitHub 图片缓存机制，上方图表可能需要 24-48 小时更新。点击可访问 Star History 网站查看实时数据。</i>
 
