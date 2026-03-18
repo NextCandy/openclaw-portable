@@ -2,6 +2,26 @@
 
 All notable changes to OpenClaw Portable will be documented in this file.
 
+## [6.0.1] - 2026-03-18
+
+### Fixed
+- **Issue #52** - 禁用本地模型的 `tools` 参数
+  - llama.cpp/Ollama 不支持 OpenAI function calling
+  - 添加 `capabilities: { tools: false }` 到 bundled-local 配置
+  - 避免 "500 Unsupported param: tools" 错误
+
+### Added
+- **Issue #43** - 权限和端口检测 + 清理脚本
+  - 管理员权限检测（Windows）
+  - 端口冲突检测（Gateway + LLM）
+  - 敏感文件清理脚本（cleanup.sh / cleanup.bat）
+  - 轻度清理：日志、PID 文件
+  - 深度清理：配置、令牌、备份
+
+### Changed
+- 改善错误提示信息
+- 增强用户体验
+
 ## [6.0.0] - 2026-03-15
 
 ### Added
