@@ -14,7 +14,7 @@ CYAN='\033[0;36m'
 NC='\033[0m'
 
 echo -e "${GREEN}╔════════════════════════════════════════╗${NC}"
-echo -e "${GREEN}║    OpenClaw Portable v6.0.0            ║${NC}"
+echo -e "${GREEN}║    OpenClaw Portable v6.0.2            ║${NC}"
 echo -e "${GREEN}║   🚀 Built-in Local Model Support      ║${NC}"
 echo -e "${GREEN}╚════════════════════════════════════════╝${NC}"
 echo ""

@@ -2,6 +2,15 @@
 
 All notable changes to OpenClaw Portable will be documented in this file.
 
+## [6.0.2] - 2026-03-22
+
+### Fixed
+- **Issue #56** - 修复端口检测逻辑错误
+  - start.bat: 修复 `PORT_CONFLICT` 条件反转 (0→1)
+  - start.bat: 修复 `errorlevel` 检查逻辑错误 (≥0 → not errorlevel 1)
+  - start.sh: 修复 `LLM_BUNDLED_READY` 变量提前引用问题
+  - start.sh: 添加 LLM 服务启动后端口验证
+
 ## [6.0.1] - 2026-03-18
 
 ### Fixed

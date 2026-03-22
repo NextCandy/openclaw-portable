@@ -1,10 +1,10 @@
 @echo off
 setlocal enabledelayedexpansion
-title OpenClaw Portable v6.0.0
+title OpenClaw Portable v6.0.2
 
 echo.
 echo ==========================================
-echo   OpenClaw Portable v6.0.0 - Offline Edition
+echo   OpenClaw Portable v6.0.2 - Offline Edition
 echo   Built-in Local Model Support
 echo ==========================================
 echo.
