@@ -66,25 +66,15 @@ set PORT_CONFLICT=0
 
 echo Checking port %GATEWAY_PORT% (Gateway)...
 netstat -ano | findstr ":%GATEWAY_PORT%" | findstr "LISTENING" >nul 2>&1
-if errorlevel 0 (
+if not errorlevel 1 (
+    echo [OK] Port %GATEWAY_PORT% is available
+) else (
     echo [ERROR] Port %GATEWAY_PORT% is already in use
     set PORT_CONFLICT=1
-) else (
-    echo [OK] Port %GATEWAY_PORT% is available
 )
 
-if exist "%LLM_BIN%" if exist "%LLM_MODEL%" (
-    echo Checking port %LLM_PORT% (LLM)...
-    netstat -ano | findstr ":%LLM_PORT%" | findstr "LISTENING" >nul 2>&1
-    if errorlevel 0 (
-        echo [ERROR] Port %LLM_PORT% is already in use
-        set PORT_CONFLICT=1
-    ) else (
-        echo [OK] Port %LLM_PORT% is available
-    )
-)
-
-if !PORT_CONFLICT!==0 (
+if !PORT_CONFLICT!==1 (
+    rem === LLM 端口检测移到 [3/6] 步之后（在启动 llama-server 之后） ===
     echo.
     echo [WARN] Port conflicts detected!
     echo        1. Stop the processes using these ports

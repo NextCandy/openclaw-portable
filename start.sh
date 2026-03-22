@@ -137,13 +137,14 @@ else
     echo -e "${GREEN}  [OK] 端口 $GATEWAY_PORT 可用${NC}"
 fi
 
+# === 在启动 llama-server 之后再次检测 LLM 端口(确保服务已启动) ===
 if [ "$LLM_BUNDLED_READY" = "1" ]; then
-    echo -e "${CYAN}  检测端口 $LLM_PORT (LLM)...${NC}"
+    sleep 2  # 等待 2 秒让服务完全启动
     if lsof -i :$LLM_PORT -sTCP:LISTEN -t &>/dev/null 2>&1 || netstat -an 2>/dev/null | grep -q ":$LLM_PORT.*LISTEN"; then
-        echo -e "${RED}  [错误] 端口 $LLM_PORT 已被占用${NC}"
-        PORT_CONFLICT=1
+        echo -e "${GREEN}  [OK] LLM 服务已成功启动${NC}"
     else
-        echo -e "${GREEN}  [OK] 端口 $LLM_PORT 可用${NC}"
+        echo -e "${RED}  [错误] LLM 服务启动失败${NC}"
+        PORT_CONFLICT=1
     fi
 fi
 
@@ -262,6 +263,15 @@ else
   echo -e "${YELLOW}   二进制路径: $LLM_BIN${NC}"
 fi
 
+rem === 在启动 llama-server 之后再次检测 LLM 端口（确保服务已启动） ===
+if [ "$LLM_BUNDLED_READY" = "1" ]; then
+    if lsof -i :$LLM_PORT -sTCP:LISTEN -t &>/dev/null 2>&1 || netstat -an 2>/dev/null | grep -q ":$LLM_PORT.*LISTEN"; then
+        echo -e "${RED}  [错误] LLM 服务启动失败，端口 $LLM_PORT 仍被占用${NC}"
+        PORT_CONFLICT=1
+    else
+        echo -e "${GREEN}  [OK] LLM 服务已成功启动${NC}"
+    fi
+fi
 # ============================================
 # 4/6 初始化工作目录
 # ============================================
