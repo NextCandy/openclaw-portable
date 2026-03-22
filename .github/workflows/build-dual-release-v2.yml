@@ -1,0 +1,221 @@
+name: Build Dual release packages (修复版)
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build-offline:
+    runs-on: windows-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create directory structure
+        shell: bash
+        run: |
+          mkdir -p dist/Openclaw-Portable-v6.0.2-windows-offline/node
+
+      - name: Download Node.js
+        shell: bash
+        run: |
+          curl -fsSL \
+            "https://nodejs.org/dist/v22.16.0/node-v22.16.0-win-x64.zip" \
+            -o /tmp/node.zip
+
+          unzip -q /tmp/node.zip -d /tmp/
+          mv /tmp/node-v22.16.0-win-x64/* dist/openclaw-Portable-v6.0.2-windows-offline/node
+          rm -rf /tmp/node.zip /tmp/node-v22.16.0-win-x64
+
+      - name: Install OpenClaw
+        shell: bash
+        run: |
+          cd dist/openclaw-Portable-v6.0.2-windows-offline
+
+          ./node/node.exe ./node/node_modules/npm/bin/npm-cli.js \
+            install -g openclaw@latest \
+            --prefix openclaw-pkg \
+            --registry https://registry.npmmirror.com
+
+      - name: Copy scripts
+        shell: bash
+        run: |
+          cp start.bat stop.bat check.bat dist/openclaw-Portable-v6.0.2-windows-offline/ || true
+          cp start.bat stop.bat check.bat dist/openclaw-Portable-v6.0.2-windows-online/ || true
+
+      - name: Create archive
+        shell: bash
+        run: |
+          cd dist/openclaw-Portable-v6.0.2-windows-offline
+          tar -czf Openclaw-Portable-v6.0.2-windows-offline.tar.gz openclaw-Portable-v6.0.2-windows-offline
+
+          ls -lh openclaw-Portable-v6.0.2-windows-offline.tar.gz
+
+          echo "✅ 离线包已创建: $(ls -lh)"
+
+          cd dist/openclaw-Portable-v6.0.2-windows-online
+          tar -czf openclaw-Portable-v6.0.2-windows-online.tar.gz openclaw-Portable-v6.0.2-windows-online
+          ls -lh openclaw-Portable-v6.0.2-windows-online.tar.gz
+
+      - name: Upload to Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: openclaw-portable-v6.0.2-windows-offline
+          path: dist/openclaw-Portable-v6.0.2-windows-offline.tar.gz
+          retention-days: 90
+          compression-level: 0
+
+      - name: upload to release using curl
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd packages
+          
+          # Get upload URL from release
+          UPLOAD_URL=$(curl -s \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ github.event.release.tag_name }}" | \
+            jq -r '.upload_url' | sed 's/{?name,label}//')
+          
+          echo "Upload URL: $UPLOAD_URL"
+          echo ""
+          
+          # Upload each file
+          for file in *.tar.gz; do
+            echo "📤 Uploading $file..."
+            
+            HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+            BODY=$(echo "$RESPONSE" | head -n -1)
+            
+            if [ "$HTTP_CODE" -eq 201 ]; then
+              echo "✅ $file uploaded successfully"
+            else
+              echo "❌ Failed to upload $file (HTTP $HTTP_CODE)"
+              echo "Response: $BODY"
+            fi
+            echo ""
+          done
+          
+          echo "🎉 Upload complete!"
+
+  build-online:
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create directory structure
+        shell: bash
+        run: |
+          mkdir -p dist/openclaw-Portable-v6.0.2-windows-online/node
+
+      - name: Download Node.js
+        shell: bash
+        run: |
+          curl -fsSL \
+            "https://nodejs.org/dist/v22.16.0/node-v22.16.0-win-x64.zip" \
+            -o /tmp/node.zip
+
+          unzip -q /tmp/node.zip -d /tmp/
+          mv /tmp/node-v22.16.0-win-x64/* dist/openclaw-Portable-v6.0.2-windows-online/node
+          rm -rf /tmp/node.zip /tmp/node-v22.16.0-win-x64
+
+      - name: Install OpenClaw
+        shell: bash
+        run: |
+          cd dist/openclaw-Portable-v6.0.2-windows-online
+
+          ./node/node.exe ./node/node_modules/npm/bin/npm-cli.js \
+            install -g openclaw@latest \
+            --prefix openclaw-pkg \
+            --registry https://registry.npmmirror.com
+
+      - name: Copy scripts
+        shell: bash
+        run: |
+          cp start.bat stop.bat check.bat dist/openclaw-Portable-v6.0.2-windows-offline/ || true
+          cp start.bat stop.bat check.bat dist/openclaw-Portable-v6.0.2-windows-online/ || true
+      - name: Create archive
+        shell: bash
+        run: |
+          cd dist
+          tar -czf Openclaw-Portable-v6.0.2-windows-online.tar.gz openclaw-Portable-v6.0.2-windows-online
+          ls -lh openclaw-Portable-v6.0.2-windows-online.tar.gz
+
+      - name: Upload to artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: openclaw-portable-v6.0.2-windows-online
+          path: dist/openclaw-Portable-v6.0.2-windows-online.tar.gz
+          retention-days: 90
+          compression-level: 0
+
+  upload-to-release:
+    needs: [build-offline, build-online]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+
+    steps:
+      - name: Download offline artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: openclaw-portable-v6.0.2-windows-offline
+          path: ./packages
+      - name: Download online artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: openclaw-portable-v6.0.2-windows-online
+          path: ./packages
+      - name: List packages
+        run: ls -lh packages/
+
+      - name: Upload to release using curl
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd packages
+          
+          # Get upload URL from release
+          UPLOAD_URL=$(curl -s \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ github.event.release.tag_name }}" | \
+            jq -r '.upload_url' | sed 's/{?name,label}//')
+          
+          echo "Upload URL: $upload_url"
+          echo ""
+          
+          # Upload each file
+          for file in *.tar.gz; do
+            echo "📤 Uploading $file..."
+            
+            RESPONSE=$(curl -s -w "\n%{http_code}" \
+              -X POST \
+              -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Content-Type: application/gzip" \
+              --data-binary @"$file" \
+              "${UPLOAD_URL}?name=${file}")
+            
+            HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+            BODY=$(echo "$RESPONSE" | head -n -1)
+            
+            if [ "$HTTP_CODE" -eq 201 ]; then
+              echo "✅ $file uploaded successfully"
+            else
+              echo "❌ Failed to upload $file (HTTP $HTTP_CODE)"
+              echo "Response: $BODY"
+            fi
+            echo ""
+          done
+          
+          echo "🎉 Upload complete!
