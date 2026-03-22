@@ -20,8 +20,10 @@ jobs:
 
       - name: Create directory structure
         shell: bash
+        env:
+          VERSION: ${{ github.event.release.tag_name }}
         run: |
-          mkdir -p dist/OpenClaw-Portable-v6.0.0-windows-offline/node
+          mkdir -p dist/OpenClaw-Portable-${{ env.VERSION }}-windows-offline/node
 
       - name: Download Node.js
         shell: bash
@@ -31,13 +33,13 @@ jobs:
             -o /tmp/node.zip
 
           unzip -q /tmp/node.zip -d /tmp/
-          mv /tmp/node-v22.16.0-win-x64/* dist/OpenClaw-Portable-v6.0.0-windows-offline/node/
+          mv /tmp/node-v22.16.0-win-x64/* dist/OpenClaw-Portable-${{ env.VERSION }}-windows-offline/node/
           rm -rf /tmp/node.zip /tmp/node-v22.16.0-win-x64
 
       - name: Install OpenClaw
         shell: bash
         run: |
-          cd dist/OpenClaw-Portable-v6.0.0-windows-offline
+          cd dist/OpenClaw-Portable-${{ env.VERSION }}-windows-offline
 
           ./node/node.exe ./node/node_modules/npm/bin/npm-cli.js \
             install -g openclaw@latest \
@@ -47,22 +49,22 @@ jobs:
       - name: Copy scripts
         shell: bash
         run: |
-          cp start.bat stop.bat check.bat dist/OpenClaw-Portable-v6.0.0-windows-offline/ || true
+          cp start.bat stop.bat check.bat dist/OpenClaw-Portable-${{ env.VERSION }}-windows-offline/ || true
 
       - name: Create archive
         shell: bash
         run: |
           cd dist
-          tar -czf OpenClaw-Portable-v6.0.0-windows-offline.tar.gz \
-            OpenClaw-Portable-v6.0.0-windows-offline
+          tar -czf OpenClaw-Portable-${{ env.VERSION }}-windows-offline.tar.gz \
+            OpenClaw-Portable-${{ env.VERSION }}-windows-offline
 
-          ls -lh OpenClaw-Portable-v6.0.0-windows-offline.tar.gz
+          ls -lh OpenClaw-Portable-${{ env.VERSION }}-windows-offline.tar.gz
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: openclaw-portable-v6.0.0-windows-offline
-          path: dist/OpenClaw-Portable-v6.0.0-windows-offline.tar.gz
+          name: openclaw-portable-${{ env.VERSION }}-windows-offline
+          path: dist/OpenClaw-Portable-${{ env.VERSION }}-windows-offline.tar.gz
           retention-days: 90
           compression-level: 0
 
@@ -76,8 +78,10 @@ jobs:
 
       - name: Create directory structure
         shell: bash
+        env:
+          VERSION: ${{ github.event.release.tag_name }}
         run: |
-          mkdir -p dist/OpenClaw-Portable-v6.0.0-windows-online/node
+          mkdir -p dist/OpenClaw-Portable-${{ env.VERSION }}-windows-online/node
 
       - name: Download Node.js
         shell: bash
@@ -87,13 +91,13 @@ jobs:
             -o /tmp/node.zip
 
           unzip -q /tmp/node.zip -d /tmp/
-          mv /tmp/node-v22.16.0-win-x64/* dist/OpenClaw-Portable-v6.0.0-windows-online/node/
+          mv /tmp/node-v22.16.0-win-x64/* dist/OpenClaw-Portable-${{ env.VERSION }}-windows-online/node/
           rm -rf /tmp/node.zip /tmp/node-v22.16.0-win-x64
 
       - name: Install OpenClaw
         shell: bash
         run: |
-          cd dist/OpenClaw-Portable-v6.0.0-windows-online
+          cd dist/OpenClaw-Portable-${{ env.VERSION }}-windows-online
 
           ./node/node.exe ./node/node_modules/npm/bin/npm-cli.js \
             install -g openclaw@latest \
@@ -103,22 +107,22 @@ jobs:
       - name: Copy scripts
         shell: bash
         run: |
-          cp start.bat stop.bat check.bat dist/OpenClaw-Portable-v6.0.0-windows-online/ || true
+          cp start.bat stop.bat check.bat dist/OpenClaw-Portable-${{ env.VERSION }}-windows-online/ || true
 
       - name: Create archive
         shell: bash
         run: |
           cd dist
-          tar -czf OpenClaw-Portable-v6.0.0-windows-online.tar.gz \
-            OpenClaw-Portable-v6.0.0-windows-online
+          tar -czf OpenClaw-Portable-${{ env.VERSION }}-windows-online.tar.gz \
+            OpenClaw-Portable-${{ env.VERSION }}-windows-online
 
-          ls -lh OpenClaw-Portable-v6.0.0-windows-online.tar.gz
+          ls -lh OpenClaw-Portable-${{ env.VERSION }}-windows-online.tar.gz
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: openclaw-portable-v6.0.0-windows-online
-          path: dist/OpenClaw-Portable-v6.0.0-windows-online.tar.gz
+          name: openclaw-portable-${{ env.VERSION }}-windows-online
+          path: dist/OpenClaw-Portable-${{ env.VERSION }}-windows-online.tar.gz
           retention-days: 90
           compression-level: 0
 
@@ -126,18 +130,20 @@ jobs:
     needs: [build-offline, build-online]
     runs-on: ubuntu-latest
     if: github.event_name == 'release'
+    env:
+      VERSION: ${{ github.event.release.tag_name }}
 
     steps:
       - name: Download offline artifact
         uses: actions/download-artifact@v4
         with:
-          name: openclaw-portable-v6.0.0-windows-offline
+          name: openclaw-portable-${{ env.VERSION }}-windows-offline
           path: ./packages
 
       - name: Download online artifact
         uses: actions/download-artifact@v4
         with:
-          name: openclaw-portable-v6.0.0-windows-online
+          name: openclaw-portable-${{ env.VERSION }}-windows-online
           path: ./packages
 
       - name: List packages
